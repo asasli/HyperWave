@@ -1,7 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.cm import get_cmap
+from matplotlib.pyplot import get_cmap
 
 fig_width_pt = 246.0  # Get this from LaTeX using \showthe\columnwidth
 inches_per_pt = 1.0/72.27               # Convert pt to inch
