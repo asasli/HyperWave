@@ -1,7 +1,6 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
-from matplotlib.pyplot import get_cmap
 
 fig_width_pt = 246.0  # Get this from LaTeX using \showthe\columnwidth
 inches_per_pt = 1.0/72.27               # Convert pt to inch
@@ -76,7 +75,7 @@ class Shape:
         else:
             self.ndims = int(self.samples.shape[1])
             self.alpha_dim = 1
-        cmap = get_cmap('nipy_spectral')  # Using a neon-like colormap
+        cmap = plt.get_cmap('nipy_spectral')  # Using a neon-like colormap
         self.clr = [cmap(i / self.ndims) for i in range(self.ndims)]
         if self.hyperwave == 'classic':
             self.alpha, self.delta = 10**np.median(samples[:, 0:self.alpha_dim]), 10**np.median(samples[:, self.alpha_dim:], axis=0)
