@@ -1,7 +1,8 @@
 from pathlib import Path
 
 import numpy as np
-from hyperwave.detectors.lvk import DetectorNoise, GW
+
+from hyperwave.detectors.lvk import GW, DetectorNoise
 from hyperwave.likelihoods import GWLikelihoods
 
 trigger_time = 1268189526.951953

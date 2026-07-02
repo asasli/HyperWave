@@ -7,7 +7,6 @@ import pytest
 from scipy.special import logsumexp
 
 from conftest import requires_bilby
-
 from hyperwave.detectors.calibration import CubicSpline, _batch_calibration_factor
 from hyperwave.detectors.waveforms.template import Template
 from hyperwave.likelihoods import GWLikelihoods
