@@ -62,7 +62,7 @@ class LVKinference:
     def _prepare_priors(self):
         """Construct full Bilby prior dictionary with user and noise parameters."""
         self.priors = bilby.core.prior.PriorDict(self.user_priors)
-        if self.common["like"] not in ['gauss']:
+        if self.common["like"] not in ['gauss', 'gaussian']:
             self.priors.update(self.noise_priors)
         self.ndims = len(self.priors)
         # Normalize `self.periodic` to be a list of integer indices.
@@ -225,6 +225,7 @@ class LVKinference:
         n_total = self.kwargs.get("n_total", 50000)
         n_effective = self.kwargs.get("n_effective", 12000) # 2000
         n_active = self.kwargs.get("n_active", 400) #1000
+        n_steps = self.kwargs.get("n_steps", max(10, int(0.7 * self.ndims)))
 
         sampler = pc.Sampler(
             likelihood=self.loglikelihood,
@@ -233,7 +234,7 @@ class LVKinference:
             n_active=n_active,
             vectorize=True,
             periodic=self.periodic,
-            n_steps=max(10, int(0.7 * self.ndims)), #n_steps=self.ndims
+            n_steps=n_steps,
         )
 
         print("> Running POCOMC sampling...")

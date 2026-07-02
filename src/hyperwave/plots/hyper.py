@@ -55,7 +55,28 @@ rcparams2 = {
 }
 
 class Shape:
-    def __init__(self, samples, black_background=False, hyperwave='classic', ddims=True, save_dir=None, TAG=None):
+    def __init__(self, samples, black_background=False, hyperwave='classic',
+                 ddims=True, log_scale=False, labels=None, show=True,
+                 save_dir=None, TAG=None):
+        """Render the generalised-hyperbolic (ξ, χ) noise shape triangle.
+
+        Parameters
+        ----------
+        samples : ndarray, shape (N, 2 * nsegs)
+            Posterior samples of the per-segment shape parameters. The first
+            half of the columns are α, the second half are δ (for
+            ``hyperwave='classic'``) or δ/α (otherwise).
+        log_scale : bool, default ``False``
+            If ``False`` (the **default**) the columns are interpreted as
+            *linear* α and δ — matching the current ``GWLikelihoods`` hyperbolic
+            convention (Uniform(0, 30) priors). Set ``True`` for the legacy paper
+            parametrisation where the sampled columns are ``log10 α`` and
+            ``log10 δ`` (or ``log10 δ/α``).
+        labels : list[str] or None
+            One legend label per segment/point.
+        show : bool, default ``True``
+            Call ``plt.show()`` after drawing (set ``False`` for headless use).
+        """
         if black_background:
             self.rcparams = rcparams1
             self.triangle_color = 'w'
@@ -68,31 +89,30 @@ class Shape:
             self.save_name = None
         matplotlib.rcParams.update(self.rcparams)
         self.hyperwave = hyperwave
-        self.samples = samples
-        if ddims:
-            self.ndims = int(self.samples.shape[1]/2)
-            self.alpha_dim = int(self.samples.shape[1]/2)
-        else:
-            self.ndims = int(self.samples.shape[1])
-            self.alpha_dim = 1
+        self.samples = np.asarray(samples)
+        self.show = show
+        self.labels = labels
+        self.alpha_dim = int(self.samples.shape[1] / 2) if ddims else 1
+        self.ndims = self.alpha_dim
         cmap = matplotlib.colormaps['nipy_spectral']  # Using a neon-like colormap
-        self.clr = [cmap(i / self.ndims) for i in range(self.ndims)]
-        if self.hyperwave == 'classic':
-            self.alpha, self.delta = 10**np.median(samples[:, 0:self.alpha_dim]), 10**np.median(samples[:, self.alpha_dim:], axis=0)
-            self.ratio = samples[:, self.alpha_dim:]/samples[:, 0:self.alpha_dim]  # delta / alpha
-            self.median_sigma = np.median(self.ratio, axis=0)
-            self.upper_sigma = np.percentile(self.ratio, 90, axis=0)
-            self.lower_sigma = np.percentile(self.ratio, 10, axis=0)
-            _, self.ksi, _ = self.xi_ksi(beta=0, alpha=self.alpha, delta=self.delta)
-        else:
-            self.alpha, self.delta = self.convert_a_bar_to_alpha_delta(samples=self.samples, alpha_dim=self.alpha_dim)
-            self.ratio = 10**(samples[:, self.alpha_dim:])  # delta / alpha
-            self.median_sigma = np.median(self.ratio, axis=0)
-            self.upper_sigma = np.percentile(self.ratio, 90, axis=0)
-            self.lower_sigma = np.percentile(self.ratio, 10, axis=0)
-            _, self.ksi, _ = self.xi_ksi(beta=0, alpha=self.alpha, delta=self.delta)
+        self.clr = [cmap(i / max(self.ndims, 1)) for i in range(self.ndims)]
+
+        a = self.samples[:, 0:self.alpha_dim]
+        b = self.samples[:, self.alpha_dim:]          # δ (classic) or δ/α
+        if log_scale:                                  # legacy: log10 columns
+            a, b = 10.0 ** a, 10.0 ** b
+        self.alpha = np.median(a, axis=0)
+        if self.hyperwave == 'classic':                # b is δ directly
+            self.delta = np.median(b, axis=0)
+            self.ratio = b / a                         # δ/α per sample
+        else:                                          # b is δ/α
+            self.delta = self.alpha * np.median(b, axis=0)
+            self.ratio = b
+        self.median_sigma = np.median(self.ratio, axis=0)
+        self.upper_sigma = np.percentile(self.ratio, 90, axis=0)
+        self.lower_sigma = np.percentile(self.ratio, 10, axis=0)
+        _, self.ksi, _ = self.xi_ksi(beta=0, alpha=self.alpha, delta=self.delta)
         self.shape_triangle(beta=0, alpha=self.alpha, delta=self.delta, clr=self.clr)
-        pass
 
     @staticmethod
     def convert_a_bar_to_alpha_delta(samples, alpha_dim):
@@ -112,13 +132,11 @@ class Shape:
         return xi, ksi, rho
 
     def shape_triangle(self, beta, alpha, delta, clr):
-        """ Plot the shape of the triangle. """
+        """ Plot the (ξ, χ) shape triangle. Returns the Matplotlib figure. """
         xi, self.ksi, _ = self.xi_ksi(beta, alpha, delta)
-        fig, ax = plt.subplots(1, figsize=[6, 5])
-        trianglex = [-1, 1, 0, -1]  # repeated last coordinates to form the outline of the triangle
-        triangley = [1, 1, 0, 1]
-
-        ax.plot(trianglex, triangley, '-', color=self.triangle_color)
+        xi, self.ksi = np.atleast_1d(xi), np.atleast_1d(self.ksi)
+        self.fig, ax = plt.subplots(1, figsize=[6, 5])
+        ax.plot([-1, 1, 0, -1], [1, 1, 0, 1], '-', color=self.triangle_color)
         plt.ylim(-0.15, 1.15)
         plt.xlim(-1.2, 1.2)
         plt.text(0.0, 1.03, 'skew−Laplace distribution', family='serif', fontsize=10, style='italic', ha='center', wrap=False)
@@ -129,13 +147,17 @@ class Shape:
         plt.ylabel(r'$\xi$')
 
         for i in range(len(self.ksi)):
-            ax.plot(xi[i], self.ksi[i], '*', markersize='10', color=clr[i], alpha=0.6)
+            lab = self.labels[i] if (self.labels is not None and i < len(self.labels)) else None
+            ax.plot(xi[i], self.ksi[i], '*', markersize=10, color=clr[i], alpha=0.8, label=lab)
+        if self.labels is not None:
+            ax.legend(loc='upper right', fontsize=9)
 
         plt.tight_layout()
         if self.save_name is not None:
             plt.savefig(self.save_name + 'shape_triangle.pdf', dpi=300, bbox_inches='tight', transparent=True)
-        plt.show()
-        return
+        if self.show:
+            plt.show()
+        return self.fig
     
     def PSD_correction(self, f, Sn, segi):
         """ Plot the PSD correction. """

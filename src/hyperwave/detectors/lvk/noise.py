@@ -306,7 +306,9 @@ class DetectorNoise:
                 det, self.sampling_rate, self.duration, start_time=self.start_time,
                 minimum_frequency=self.minimum_frequency, maximum_frequency=self.maximum_frequency,
             )
-            data = TimeSeries.fetch_open_data(det, self.start_time, self.end_time)
+            data = TimeSeries.fetch_open_data(
+                det, self.start_time, self.end_time, sample_rate=self.sampling_rate
+            )
             ifo.strain_data.set_from_gwpy_timeseries(data)
 
             logger.info("Downloading psd data for ifo %s", det)

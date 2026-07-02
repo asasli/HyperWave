@@ -1,9 +1,9 @@
-"""Real-event PE on GW150914 with the hyperbolic likelihood — Eryn vs pocoMC.
+"""Real-event PE on GW150914 — Eryn vs pocoMC.
 
 Downloads ~4 s of open H1+L1 strain around GW150914 (GWOSC), conditions it, and
-runs full CBC parameter estimation with the heavy-tailed hyperbolic likelihood
-under **both** samplers, reporting wall-clock times for a head-to-head
-comparison. There is no injected truth — this is the real signal.
+runs full CBC parameter estimation with the selected likelihood under **both**
+samplers, reporting wall-clock times for a head-to-head comparison. There is no
+injected truth — this is the real signal.
 
     python examples/real_event/gw150914_pe.py --sampler eryn
     python examples/real_event/gw150914_pe.py --sampler pocomc
@@ -28,16 +28,17 @@ from hyperwave.likelihoods import GWLikelihoods
 
 # GW150914
 GW150914_TIME = 1126259462.4
+HYPERBOLIC_SHAPE_MIN = 1e-6
 BBH_PARAMETER_NAMES = [
     "chirp_mass", "mass_ratio", "luminosity_distance", "psi", "phase",
-    "ra", "dec", "chi_1", "chi_2", "cos_theta_jn", "cos_tilt_1",
+    "ra", "dec", "a_1", "a_2", "cos_theta_jn", "cos_tilt_1",
     "cos_tilt_2", "phi_12", "phi_jl", "geocent_time",
 ]
 PERIODIC = ["psi", "phase", "ra", "phi_12", "phi_jl"]
 
 
-def build_problem(duration=4.0, fs=4096.0, fmin=20.0, fmax=512.0, nsegs=4):
-    """Download GW150914 open data and build the hyperbolic likelihood."""
+def build_problem(duration=4.0, fs=4096.0, fmin=20.0, fmax=512.0, nsegs=4, workers=1):
+    """Download GW150914 open data and build the selected likelihood object."""
     detectors = ["H1", "L1"]
     noise = DetectorNoise(duration, fs, GW150914_TIME, detectors,
                           minimum_frequency=fmin, maximum_frequency=fmax)
@@ -48,13 +49,15 @@ def build_problem(duration=4.0, fs=4096.0, fmin=20.0, fmax=512.0, nsegs=4):
     # unknown a priori, and fixing it to a rounded value biases the masses (the
     # template can't time-align, so chirp_mass/q distort to compensate).
     template = GW(noise, approximant="IMRPhenomPv2", reference_frequency=50.0,
-                  parameters=BBH_PARAMETER_NAMES, static_parameters={})
+                  parameters=BBH_PARAMETER_NAMES, static_parameters={},
+                  n_jobs=workers)
 
     f, asd0 = template.detector_asd_masked(0)
     psd = np.array([asd0 ** 2, template.detector_asd_masked(1)[1] ** 2])
     data = np.array([template.detector_data_fd(0), template.detector_data_fd(1)])
     likelihood = GWLikelihoods(data=data, f=f, ifos_list=detectors, noise=psd,
-                               template=template, ddims=False, nsegs=nsegs, gpu=False)
+                               template=template, ddims=False, nsegs=nsegs,
+                               gpu=False, cpu_cores=workers)
     return likelihood
 
 
@@ -67,8 +70,8 @@ def make_priors(nsegs, like="hyperbolic"):
     pr["phase"] = bilby.core.prior.Uniform(0, 2 * np.pi, name="phase", latex_label=r"$\phi$")
     pr["ra"] = bilby.core.prior.Uniform(0, 2 * np.pi, name="ra", latex_label=r"$\alpha$")
     pr["dec"] = bilby.core.prior.Cosine(name="dec", latex_label=r"$\delta$")
-    pr["chi_1"] = bilby.core.prior.Uniform(-1, 1, name="chi_1", latex_label=r"$\chi_1$")
-    pr["chi_2"] = bilby.core.prior.Uniform(-1, 1, name="chi_2", latex_label=r"$\chi_2$")
+    pr["a_1"] = bilby.core.prior.Uniform(0, 0.99, name="a_1", latex_label=r"$a_1$")
+    pr["a_2"] = bilby.core.prior.Uniform(0, 0.99, name="a_2", latex_label=r"$a_2$")
     pr["cos_theta_jn"] = bilby.core.prior.Uniform(-1, 1, name="cos_theta_jn", latex_label=r"$\cos\theta_{JN}$")
     pr["cos_tilt_1"] = bilby.core.prior.Uniform(-1, 1, name="cos_tilt_1", latex_label=r"$\cos t_1$")
     pr["cos_tilt_2"] = bilby.core.prior.Uniform(-1, 1, name="cos_tilt_2", latex_label=r"$\cos t_2$")
@@ -77,7 +80,7 @@ def make_priors(nsegs, like="hyperbolic"):
     pr["geocent_time"] = bilby.core.prior.Uniform(
         GW150914_TIME - 0.1, GW150914_TIME + 0.1, name="geocent_time", latex_label=r"$t_c$")
     # Noise priors depend on the likelihood family:
-    #   * gaussian: none (fixed-PSD Whittle assumption)
+    #   * gaussian: none (fixed-PSD Gaussian likelihood)
     #   * hyperbolic: scale alpha + per-segment delta (heavy-tailed shape)
     #   * whittle:    per-segment log10 noise level (data-driven Whittle)
     if like == "gaussian":
@@ -86,13 +89,14 @@ def make_priors(nsegs, like="hyperbolic"):
         noise_priors = {f"log_level_{i}": bilby.core.prior.Uniform(-1.0, 1.0)
                         for i in range(nsegs)}
     else:  # hyperbolic
-        noise_priors = {r"$\alpha$": bilby.core.prior.Uniform(0.0, 30.0)}
+        noise_priors = {r"$\alpha$": bilby.core.prior.Uniform(HYPERBOLIC_SHAPE_MIN, 30.0)}
         for i in range(nsegs):
-            noise_priors[r"$\delta_{}$".format(i)] = bilby.core.prior.Uniform(0.0, 30.0)
+            noise_priors[r"$\delta_{}$".format(i)] = bilby.core.prior.Uniform(
+                HYPERBOLIC_SHAPE_MIN, 30.0)
     return pr, noise_priors
 
 
-def run_one(sampler, likelihood, priors, noise_priors, outdir, workers, quick, like="hyperbolic"):
+def run_one(sampler, likelihood, priors, noise_priors, outdir, quick, like="hyperbolic"):
     if sampler == "eryn":
         kw = dict(nwalkers=44, ntemps=4, burn=50, nsteps=100) if quick \
             else dict(nwalkers=50, ntemps=20, burn=20000, nsteps=70000)
@@ -138,16 +142,15 @@ def main():
     args = p.parse_args()
 
     os.makedirs(os.path.join(args.outdir, "chains"), exist_ok=True)
-    likelihood = build_problem(nsegs=args.nsegs)
+    likelihood = build_problem(nsegs=args.nsegs, workers=args.workers)
     priors, noise_priors = make_priors(args.nsegs, like=args.likelihood)
 
     if args.setup_only:
-        # one vectorised likelihood eval at two random prior draws
-        n_noise = len(noise_priors)
-        ndim = 15 + n_noise
-        theta = np.random.default_rng(0).uniform(0.1, 1.0, size=(2, ndim))
-        theta[:, 0] = 28.0          # plausible chirp mass so the waveform call is sane
-        theta[:, 14] = GW150914_TIME  # geocent_time near the trigger
+        # One vectorised likelihood eval at two actual prior draws.
+        theta = np.column_stack([prior.sample(2) for prior in priors.values()])
+        if noise_priors:
+            noise_theta = np.column_stack([prior.sample(2) for prior in noise_priors.values()])
+            theta = np.column_stack([theta, noise_theta])
         like_fn = {"gaussian": likelihood.gaussian,
                    "hyperbolic": likelihood.hyperbolic_classic,
                    "whittle": likelihood.whittle_level}[args.likelihood]
@@ -157,7 +160,7 @@ def main():
 
     samplers = ["eryn", "pocomc"] if args.sampler == "both" else [args.sampler]
     results = [run_one(s, likelihood, priors, noise_priors, args.outdir,
-                       args.workers, args.quick, like=args.likelihood)
+                       args.quick, like=args.likelihood)
                for s in samplers]
 
     print("\n========== TIMING SUMMARY (GW150914) ==========")
