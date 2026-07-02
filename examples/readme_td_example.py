@@ -7,8 +7,8 @@ from hyperwave.likelihoods import TimeDomainGWLikelihoods
 
 trigger_time = 1268189526.951953
 duration = 2.0
-sampling_rate = 512
-maximum_frequency = 256
+sampling_rate = 1024
+maximum_frequency = 500
 params = ["chirp_mass", "mass_ratio", "luminosity_distance", "psi", "phase",
           "ra", "dec", "chi_1", "chi_2", "cos_theta_jn", "cos_tilt_1",
           "cos_tilt_2", "phi_12", "phi_jl"]
