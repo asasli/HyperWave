@@ -247,7 +247,8 @@ def test_heterodyned_hyperbolic_likelihood():
     tr[:, 2] *= 1 + rng.uniform(-0.015, 0.015, 16)
     full = np.column_stack([tr, rng.uniform(1.0, 15.0, 16),
                             rng.uniform(0.3, 15.0, 16), rng.uniform(0.3, 15.0, 16)])
-    refr = full.copy(); refr[:, :4] = theta_ref
+    refr = full.copy()
+    refr[:, :4] = theta_ref
     ge = np.atleast_1d(exact.hyperbolic_classic(full)) - np.atleast_1d(exact.hyperbolic_classic(refr))
     gh = np.atleast_1d(het.logl(full)) - np.atleast_1d(het.logl(refr))
     assert np.max(np.abs(gh - ge)) < 0.3

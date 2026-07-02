@@ -373,12 +373,18 @@ class HeterodynedHyperbolicLikelihood(BaseLikelihood):
         self._dgrid = dgrid
         G = dgrid.size
         starts = edge_idx[:-1]
-        U0 = np.zeros((G, n_ifo, B)); U1 = np.zeros_like(U0); U2 = np.zeros_like(U0)
-        V0 = np.zeros((G, n_ifo, B), dtype=complex); V1 = np.zeros_like(V0)
+        U0 = np.zeros((G, n_ifo, B))
+        U1 = np.zeros_like(U0)
+        U2 = np.zeros_like(U0)
+        V0 = np.zeros((G, n_ifo, B), dtype=complex)
+        V1 = np.zeros_like(V0)
         # second-order (w3) summaries: same structure, weight 1/(8(d^2+yy0)^{3/2})
         W3 = np.zeros((G, B))
-        P0 = np.zeros((G, n_ifo, B)); P1 = np.zeros_like(P0); P2 = np.zeros_like(P0)
-        Q0 = np.zeros((G, n_ifo, B), dtype=complex); Q1 = np.zeros_like(Q0)
+        P0 = np.zeros((G, n_ifo, B))
+        P1 = np.zeros_like(P0)
+        P2 = np.zeros_like(P0)
+        Q0 = np.zeros((G, n_ifo, B), dtype=complex)
+        Q1 = np.zeros_like(Q0)
         seg_id_f = (np.searchsorted(seg_starts, np.arange(f.size), side="right") - 1).astype(int)
         for g, dg in enumerate(dgrid):
             root = np.sqrt(dg * dg + yy0)               # (nf,)

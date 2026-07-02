@@ -5,8 +5,8 @@ from .base import BaseLikelihood
 from .distributions_fd import LogLike, loglike
 from .gwparallel import GWLikelihoods
 from .heterodyne import (
-    HeterodyneLikelihood,
     HeterodynedHyperbolicLikelihood,
+    HeterodyneLikelihood,
     InterpolatedWaveformTemplate,
     heterodyne_bin_edges,
 )

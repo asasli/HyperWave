@@ -117,7 +117,6 @@ def main():
             # exact-MH flow proposal over the FULL sampled vector (science +
             # noise-shape); prior fallback until the callback has trained it.
             from eryn.moves import StretchMove
-
             from hyperwave.inference.flow_proposals import (
                 FlowTrainingCallback,
                 build_pe_flow_proposal,

@@ -39,6 +39,16 @@ class BaseLikelihood:
         """Return a host (NumPy) array, copying off the device when on GPU."""
         return self._backend.to_numpy(out) if self._use_gpu else np.asarray(out)
 
+    def _logsumexp(self, x, axis):
+        """Numerically stable ``log(sum(exp(x)))`` on the active backend.
+
+        Backend-agnostic (NumPy/CuPy) so it works on the GPU path, where
+        ``scipy.special.logsumexp`` is unavailable.
+        """
+        m = self.xp.max(x, axis=axis, keepdims=True)
+        out = m + self.xp.log(self.xp.sum(self.xp.exp(x - m), axis=axis, keepdims=True))
+        return self.xp.squeeze(out, axis=axis)
+
     def inner_product(self, x, y, psd=None):
         """Noise-weighted inner product ``4 Re[df * sum(conj(x) y / Sn)]``.
 

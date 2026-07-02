@@ -12,6 +12,7 @@ from __future__ import annotations
 from .base import WaveformBackend, normalize_intrinsic_batch
 from .lal_backend import LALWaveform
 from .template import DEFAULT_BBH_PARAMETERS, Template, component_masses
+
 try:
     from .wavelets import (
         EXTRINSIC_PARAMETERS,

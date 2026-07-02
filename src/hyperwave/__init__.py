@@ -18,9 +18,11 @@ from .detectors import (
     Precomputed,
     PowerSpectralDensity,
     Recalibrate,
+    SplineCalibration,
     StrainData,
     Template,
     WaveletTemplate,
+    make_calibration_bank,
 )
 from .detectors.lvk import GW, DetectorNoise
 from .inference import (
@@ -32,6 +34,7 @@ from .inference import (
     LVKinference,
     SNRPrior,
     build_wavelet_priors,
+    calibration_node_priors,
     flow_backend_available,
     make_flow_distribution_move,
     make_flow_rj_move,
@@ -63,6 +66,7 @@ __all__ = [
     "LVKinference",
     "InferenceRunner",
     "DataInference",
+    "calibration_node_priors",
     "AdaptiveFlowProposal",
     "ContextAwareBirthRJMove",
     "FlowTrainingCallback",
@@ -87,6 +91,8 @@ __all__ = [
     "Precomputed",
     "Template",
     "WaveletTemplate",
+    "SplineCalibration",
+    "make_calibration_bank",
     "DetectorNoise",
     "GW",
     # wavelet reconstruction
