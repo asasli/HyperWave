@@ -106,7 +106,7 @@ print(gpu_backend_available(), torch_cuda_available())
 
 ```python
 from hyperwave import (
-    GWLikelihoods, loglike,                      # likelihoods
+    GWLikelihoods, TimeDomainGWLikelihoods, loglike,  # likelihoods
     DetectorNoise, GW,                           # LVK data and waveform template
     Detector, PowerSpectralDensity, StrainData,  # detector building blocks
     Interferometer, InterferometerList,

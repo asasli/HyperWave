@@ -11,12 +11,12 @@ except metadata.PackageNotFoundError:
 
 from . import detectors, plots
 from .detectors import (
-    Detector,
     CubicSpline,
+    Detector,
     Interferometer,
     InterferometerList,
-    Precomputed,
     PowerSpectralDensity,
+    Precomputed,
     Recalibrate,
     SplineCalibration,
     StrainData,
@@ -43,6 +43,7 @@ from .likelihoods import (
     GWLikelihoods,
     HeterodyneLikelihood,
     LogLike,
+    TimeDomainGWLikelihoods,
     WaveletLikelihood,
     gpu_backend_available,
     loglike,
@@ -76,6 +77,7 @@ __all__ = [
     # likelihoods
     "GWLikelihoods",
     "HeterodyneLikelihood",
+    "TimeDomainGWLikelihoods",
     "WaveletLikelihood",
     "LogLike",
     "loglike",

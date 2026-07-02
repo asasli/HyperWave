@@ -16,6 +16,55 @@ like = GWLikelihoods(..., template=template)
 logl = like.gaussian(thetas)          # (N,)
 ```
 
+## Time-Domain Covariance Likelihoods
+
+`TimeDomainGWLikelihoods` evaluates real time-domain residuals with a Toeplitz
+covariance. The first covariance row is built from the one-sided PSD as
+
+\[
+  \mathrm{ACF} = \frac{1}{2}\,\mathrm{irfft}(S_n \Delta f)\,N .
+\]
+
+The detector waveform is generated on the full frequency grid and inverse-FFT'd
+after the same continuous phase time delay used by the frequency-domain LVK
+template. PSD values outside the active band are patched to large finite values
+before the ACF is built, following the `bilby_greg/TD` rule.
+
+```python
+from hyperwave.likelihoods import TimeDomainGWLikelihoods
+
+like = TimeDomainGWLikelihoods(
+    data=data_td, sampling_rate=4096, ifos_list=["H1", "L1"],
+    noise=full_psd, template=template,
+    likelihood_method="toeplitz-inversion",
+    time_bands=[0.05, 0.10],
+)
+
+logl_g = like.gaussian(thetas[:, :like._wfdims])
+logl_t = like.student_t(thetas)             # theta = [signal, nu_bands]
+logl_h = like.hyperbolic_classic(thetas)    # theta = [signal, alpha, delta]
+```
+
+`likelihood_method` accepts `direct-inversion`, `cholesky-solve-triangular`,
+`toeplitz-inversion`, and `gohberg-semencul` (`gs`). Set
+`split_inner_products=True` to compute the pyRing diagnostic form
+\(\langle d|d\rangle - 2\langle d|h\rangle + \langle h|h\rangle\).
+
+Time bands can be an integer number of uniform sample-count bands or a list of
+cut times in seconds. With `detector_dependent_noise=True`, Student-t and
+hyperbolic parameters are detector-major, then band-major. Mixed detector
+families are supported:
+
+```python
+like = TimeDomainGWLikelihoods(
+    data=data_td, sampling_rate=4096, ifos_list=["H1", "L1"],
+    acf=acf, template=template, detector_dependent_noise=True,
+    detector_likelihoods={"H1": "gaussian", "L1": "hyperbolic"},
+)
+
+logl = like.mixed(thetas)   # theta = [signal, alpha_L1, delta_L1]
+```
+
 ## Hyperbolic (heavy-tailed) — the HyperWave default
 
 Replaces the Gaussian residual penalty with a hyperbolic one,
@@ -111,3 +160,4 @@ Measured against the full Gaussian likelihood (IMRPhenomPv2, 2 detectors):
 | glitches / non-Gaussian noise / unknown tails | `hyperbolic_classic` |
 | uncertain PSD level | `whittle_level` |
 | long signals (BNS), production PE throughput | `HeterodyneLikelihood` |
+| ringdown / TD covariance checks | `TimeDomainGWLikelihoods` |

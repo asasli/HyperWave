@@ -6,6 +6,8 @@
 
 ::: hyperwave.likelihoods.HeterodyneLikelihood
 
+::: hyperwave.likelihoods.TimeDomainGWLikelihoods
+
 ::: hyperwave.likelihoods.heterodyne.heterodyne_bin_edges
 
 ::: hyperwave.likelihoods.WaveletLikelihood
