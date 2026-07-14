@@ -29,3 +29,6 @@ __all__ = [
     "UCB_PARAMETER_NAMES",
     "UCB_PERIODIC",
 ]
+
+from . import smbhb
+from .smbhb import SMBHBbbhxTemplate, sky_credible_area
