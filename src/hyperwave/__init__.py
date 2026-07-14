@@ -15,11 +15,9 @@ from .detectors import (
     Interferometer,
     InterferometerList,
     PowerSpectralDensity,
-    SplineCalibration,
     StrainData,
     Template,
     WaveletTemplate,
-    make_calibration_bank,
 )
 from .detectors.lvk import GW, DetectorNoise
 from .inference import (
@@ -31,7 +29,6 @@ from .inference import (
     LVKinference,
     SNRPrior,
     build_wavelet_priors,
-    calibration_node_priors,
     flow_backend_available,
     make_flow_distribution_move,
     make_flow_rj_move,
@@ -47,11 +44,7 @@ from .likelihoods import (
 from .ml4gw import ml4gw_available, torch_cuda_available
 from .result import Result
 from .utils import load_object, save_object
-
-try:
-    from . import validation
-except ImportError:
-    validation = None  # pending upload
+from . import validation
 
 __all__ = [
     "__version__",
@@ -63,7 +56,6 @@ __all__ = [
     "LVKinference",
     "InferenceRunner",
     "DataInference",
-    "calibration_node_priors",
     "AdaptiveFlowProposal",
     "ContextAwareBirthRJMove",
     "FlowTrainingCallback",
@@ -85,8 +77,6 @@ __all__ = [
     "InterferometerList",
     "Template",
     "WaveletTemplate",
-    "SplineCalibration",
-    "make_calibration_bank",
     "DetectorNoise",
     "GW",
     # wavelet reconstruction

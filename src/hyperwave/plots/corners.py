@@ -61,6 +61,7 @@ default_colors = {
         "hyperbolic": "#dc267f", #"#FF8FFF",  # light orchid
         "gaussian": "#009e73",    # forest green
         "whittle": "#6495ED",     # cornflower blue
+        "wavelets": "#6D75CC",    # indigo (Morlet-Gabor wavelet reconstruction)
     }
 # --- Corner/ChainConsumer Plotting Utility ---
 def plot_posterior(samples, param_names, case="hyperbolic", name=None, color=None, package="corner", show=True, save_dir=None, TAG=None, truths=None, black_background=False):

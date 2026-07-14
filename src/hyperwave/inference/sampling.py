@@ -62,7 +62,7 @@ class LVKinference:
     def _prepare_priors(self):
         """Construct full Bilby prior dictionary with user and noise parameters."""
         self.priors = bilby.core.prior.PriorDict(self.user_priors)
-        if self.common["like"] not in ['gauss', 'gaussian']:
+        if self.common["like"] not in ['gauss']:
             self.priors.update(self.noise_priors)
         self.ndims = len(self.priors)
         # Normalize `self.periodic` to be a list of integer indices.
@@ -123,9 +123,17 @@ class LVKinference:
         if self.kwargs.get("update_fn") is not None:
             extra["update_fn"] = self.kwargs["update_fn"]
             extra["update_iterations"] = int(self.kwargs.get("update_iterations", 100))
-        # Setup initial positions
-        tmp = self.eryn_priors.rvs(size=nwalkers * ntemps)
-        coords = tmp.reshape((ntemps, nwalkers, self.ndims))
+        # Setup initial positions. An explicit `init_coords` (ntemps, nwalkers,
+        # ndims) warm-starts the walkers near a known solution -- essential for
+        # sharply-peaked high-SNR LISA posteriors (SMBHB) where prior-draw init
+        # never finds the peak and the chain sticks in a wrong region (e.g.
+        # edge-on inclination). Mirrors the PI's gen_data_points_close_to_true.
+        init_coords = self.kwargs.get("init_coords")
+        if init_coords is not None:
+            coords = np.asarray(init_coords).reshape((ntemps, nwalkers, self.ndims))
+        else:
+            tmp = self.eryn_priors.rvs(size=nwalkers * ntemps)
+            coords = tmp.reshape((ntemps, nwalkers, self.ndims))
 
         logl = self.loglikelihood(coords.reshape(ntemps * nwalkers, self.ndims)).reshape(ntemps, nwalkers)
         state = State(coords[:, :, np.newaxis, :], log_like=logl)
@@ -225,7 +233,13 @@ class LVKinference:
         n_total = self.kwargs.get("n_total", 50000)
         n_effective = self.kwargs.get("n_effective", 12000) # 2000
         n_active = self.kwargs.get("n_active", 400) #1000
+        # Honour an explicit n_steps (more MCMC per SMC iteration helps multimodal
+        # posteriors avoid collapse); default to the old ndim-scaled heuristic.
         n_steps = self.kwargs.get("n_steps", max(10, int(0.7 * self.ndims)))
+        # precondition=False disables the normalizing-flow preconditioner, which
+        # can overfit one mode and collapse the others on sharply multimodal
+        # orientation posteriors (UCB/SMBHB). Default True (pocoMC default).
+        precondition = self.kwargs.get("precondition", True)
 
         sampler = pc.Sampler(
             likelihood=self.loglikelihood,
@@ -235,6 +249,7 @@ class LVKinference:
             vectorize=True,
             periodic=self.periodic,
             n_steps=n_steps,
+            precondition=precondition,
         )
 
         print("> Running POCOMC sampling...")
@@ -324,9 +339,17 @@ class DataInference:
         print(f"burn: {burn}")
         print(f"nsteps: {nsteps}")
 
-        # Setup initial positions
-        tmp = self.eryn_priors.rvs(size=nwalkers * ntemps)
-        coords = tmp.reshape((ntemps, nwalkers, self.ndims))
+        # Setup initial positions. An explicit `init_coords` (ntemps, nwalkers,
+        # ndims) warm-starts the walkers near a known solution -- essential for
+        # sharply-peaked high-SNR LISA posteriors (SMBHB) where prior-draw init
+        # never finds the peak and the chain sticks in a wrong region (e.g.
+        # edge-on inclination). Mirrors the PI's gen_data_points_close_to_true.
+        init_coords = self.kwargs.get("init_coords")
+        if init_coords is not None:
+            coords = np.asarray(init_coords).reshape((ntemps, nwalkers, self.ndims))
+        else:
+            tmp = self.eryn_priors.rvs(size=nwalkers * ntemps)
+            coords = tmp.reshape((ntemps, nwalkers, self.ndims))
 
         logl = self.loglikelihood(coords.reshape(ntemps * nwalkers, self.ndims)).reshape(ntemps, nwalkers)
         state = State(coords[:, :, np.newaxis, :], log_like=logl)
