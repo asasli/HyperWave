@@ -846,10 +846,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#results" class="md-nav__link">
+  <a href="#hyperwave.inference.wavelet_proposals.MatchedFilterBirth" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Results
+        MatchedFilterBirth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.inference.wavelet_proposals.build_mf_birth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_mf_birth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.inference.wavelet_proposals.build_guided_birth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_guided_birth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results &amp; validation
       
     </span>
   </a>
@@ -938,6 +971,50 @@
     <span class="md-ellipsis">
       
         save
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pp
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp.credible_levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        credible_levels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp.pp_pvalues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pp_pvalues
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp.make_pp_plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        make_pp_plot
       
     </span>
   </a>
@@ -1436,10 +1513,43 @@
 </li>
       
         <li class="md-nav__item">
-  <a href="#results" class="md-nav__link">
+  <a href="#hyperwave.inference.wavelet_proposals.MatchedFilterBirth" class="md-nav__link">
     <span class="md-ellipsis">
       
-        Results
+        MatchedFilterBirth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.inference.wavelet_proposals.build_mf_birth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_mf_birth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.inference.wavelet_proposals.build_guided_birth" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        build_guided_birth
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#results-validation" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Results &amp; validation
       
     </span>
   </a>
@@ -1528,6 +1638,50 @@
     <span class="md-ellipsis">
       
         save
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pp
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp.credible_levels" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        credible_levels
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp.pp_pvalues" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        pp_pvalues
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#hyperwave.validation.pp.make_pp_plot" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        make_pp_plot
       
     </span>
   </a>
@@ -2722,10 +2876,98 @@ optional <code>{name: truth}</code> mapping used by the calibration/PP-tests.</p
 
     </div>
 
-</div><p>The wavelet-proposal API (<code>MatchedFilterBirth</code>, <code>build_mf_birth</code>,
-<code>build_guided_birth</code>, …) is pending the upload of
-<code>src/hyperwave/inference/wavelet_proposals.py</code>.</p>
-<h2 id="results">Results</h2>
+</div>
+
+<div class="doc doc-object doc-class">
+
+
+
+<a id="hyperwave.inference.wavelet_proposals.MatchedFilterBirth"></a>
+    <div class="doc doc-contents first">
+            <p class="doc doc-class-bases">
+              Bases: <code><span title="hyperwave.inference.wavelet_priors._ErynDistribution">_ErynDistribution</span></code></p>
+
+
+
+        <p>Joint 5-parameter birth proposal with data-fitted SNR and phase.</p>
+<p>BayesWave's birth move owes its acceptance rate to fitting the <em>linear</em>
+wavelet parameters to the data at the proposed location. This proposal does
+the same exactly: <code>(t0, f0)</code> are drawn from the whitened-data
+time/frequency maps and <code>Q</code> from its prior range, then the matched-filter
+fit of the data against the unit wavelet at <code>(t0, f0, Q)</code>,</p>
+<p>.. math:: z_k = 4\,\Delta f \sum_f d_k(f)\,\bar w_0(f) / S_k(f),</p>
+<p>gives the proposal centre: <code>SNR ~ TruncNormal(rho_hat, sigma_snr)</code> and
+<code>phi0 ~ VonMises(arg z, kappa_phi)</code>, each mixed with the prior (weight
+<code>mix</code>) so deaths of odd wavelets keep a finite reverse density. Both
+<code>rvs</code> and <code>logpdf</code> evaluate the same deterministic fit, so the Hastings
+ratio in :class:<code>eryn.moves.DistributionGenerateRJ</code> stays exact.</p>
+<p>Use as a joint entry in <code>ProbDistContainer({(0,1,2,3,4): this})</code>.</p>
+
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+
+
+  </div>
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<a id="hyperwave.inference.wavelet_proposals.build_mf_birth"></a>
+    <div class="doc doc-contents first">
+
+        <p>Matched-filter birth <code>generate_dist</code> (data-fitted SNR + phase).</p>
+<p>Same placement maps as :func:<code>build_guided_birth</code>, but the linear wavelet
+parameters are proposed around the data's matched-filter fit at the
+proposed <code>(t0, f0, Q)</code> — the missing BayesWave ingredient that lifts birth
+acceptance from "lands on the signal" to "lands on the signal with the
+right amplitude and phase".</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+
+<a id="hyperwave.inference.wavelet_proposals.build_guided_birth"></a>
+    <div class="doc doc-contents first">
+
+        <p>Build the <code>generate_dist</code> for a data-informed wavelet birth move.</p>
+<p>Returns <code>{branch_name: ProbDistContainer, "extrinsic": ProbDistContainer}</code>
+suitable for :class:<code>eryn.moves.DistributionGenerateRJ</code>. <code>t0</code> and <code>f0</code>
+follow the whitened-data time/frequency power; <code>Q</code>, SNR and <code>phi0</code> follow
+their priors (so only the placement is data-informed).</p>
+
+
+    </div>
+
+</div><h2 id="results-validation">Results &amp; validation</h2>
 
 
 <div class="doc doc-object doc-class">
@@ -3043,9 +3285,187 @@ or <code>False</code> for none.</p>
 
     </div>
 
-</div><p>PP-test validation API (<code>hyperwave.validation.pp</code>) is pending the upload of
-<code>src/hyperwave/validation/</code>.</p>
-<h2 id="detectors-templates">Detectors &amp; templates</h2>
+</div>
+
+<div class="doc doc-object doc-module">
+
+
+
+<a id="hyperwave.validation.pp"></a>
+    <div class="doc doc-contents first">
+
+        <p>Probability-probability (PP) testing for posterior calibration.</p>
+<p>A pipeline that produces credible intervals is only trustworthy if those
+intervals have the coverage they claim: the X% credible interval should contain
+the truth X% of the time. The PP-test verifies this by injecting many signals
+drawn from the prior, recovering each, and checking that the <em>credible level of
+the injected value</em> (see :meth:<code>hyperwave.Result.credible_level</code>) is
+Uniform(0, 1) across injections.</p>
+<p>This module is the pure statistical core -- it operates on a list of
+:class:<code>hyperwave.Result</code> objects (each carrying its injection) and is fully
+testable without running any inference. :mod:<code>hyperwave.validation.campaign</code>
+drives the (expensive) injection + recovery loop that produces those results.</p>
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-children">
+
+
+
+
+
+
+
+
+
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hyperwave.validation.pp.credible_levels" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">credible_levels</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Stack per-injection credible levels into an <code>(n_injections, n_param)</code> array.</p>
+
+
+<p><span class="doc-section-title">Parameters:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Type</th>
+          <th>Description</th>
+          <th>Default</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                <code>results</code>
+            </td>
+            <td>
+                  <code><span title="typing.Sequence">Sequence</span></code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Sequence of :class:<code>hyperwave.Result</code>, each with an <code>injection</code> set.</p>
+              </div>
+            </td>
+            <td>
+                <em>required</em>
+            </td>
+          </tr>
+          <tr class="doc-section-item">
+            <td>
+                <code>parameters</code>
+            </td>
+            <td>
+                  <code><span title="typing.Optional">Optional</span>[<span title="typing.Sequence">Sequence</span>[<span title="str">str</span>]]</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p>Parameters to include; defaults to those present in every injection.</p>
+              </div>
+            </td>
+            <td>
+                  <code>None</code>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    <p><span class="doc-section-title">Returns:</span></p>
+    <table>
+      <thead>
+        <tr>
+          <th>Type</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+          <tr class="doc-section-item">
+            <td>
+                  <code>levels, names:</code>
+            </td>
+            <td>
+              <div class="doc-md-description">
+                <p><code>levels[i, j]</code> is the credible level of the injected value of parameter
+<code>names[j]</code> in result <code>i</code>.</p>
+              </div>
+            </td>
+          </tr>
+      </tbody>
+    </table>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hyperwave.validation.pp.pp_pvalues" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">pp_pvalues</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">names</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Per-parameter and combined p-values that the credible levels are uniform.</p>
+<p>Each parameter gets a one-sample Kolmogorov-Smirnov p-value against
+Uniform(0, 1); the combined p-value pools them via Fisher's method. A small
+combined p-value is evidence of miscalibration (biased or over/under-confident
+posteriors).</p>
+
+
+    </div>
+
+</div>
+
+<div class="doc doc-object doc-function">
+
+
+<h2 id="hyperwave.validation.pp.make_pp_plot" class="doc doc-heading">
+            <code class="highlight language-python"><span class="n">make_pp_plot</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="n">confidence_bands</span><span class="o">=</span><span class="p">(</span><span class="mf">0.68</span><span class="p">,</span> <span class="mf">0.95</span><span class="p">,</span> <span class="mf">0.997</span><span class="p">),</span> <span class="n">title</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ax</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></code>
+
+</h2>
+
+
+    <div class="doc doc-contents ">
+
+        <p>Draw a PP-plot and return <code>(fig, pvalues)</code>.</p>
+<p>For each parameter the empirical CDF of the credible levels is plotted against
+the diagonal; a calibrated pipeline tracks the diagonal within the grey
+binomial confidence bands. The legend reports each parameter's KS p-value and
+the combined p-value.</p>
+
+
+    </div>
+
+</div>
+
+
+
+  </div>
+
+    </div>
+
+</div><h2 id="detectors-templates">Detectors &amp; templates</h2>
 
 
 <div class="doc doc-object doc-class">

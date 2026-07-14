@@ -416,6 +416,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#heterodyned-hyperbolic-relative-binning-for-the-robust-likelihood" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heterodyned hyperbolic (relative binning for the robust likelihood)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#choosing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -640,6 +651,17 @@
 </li>
       
         <li class="md-nav__item">
+  <a href="#heterodyned-hyperbolic-relative-binning-for-the-robust-likelihood" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Heterodyned hyperbolic (relative binning for the robust likelihood)
+      
+    </span>
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
   <a href="#choosing" class="md-nav__link">
     <span class="md-ellipsis">
       
@@ -671,10 +693,7 @@
 
 
 <h1 id="likelihoods">Likelihoods</h1>
-<p>All four likelihoods share one interface: construct with <code>(data, f, ifos_list,
-noise, template)</code>, call with a <strong>batch</strong> of parameter vectors <code>(N, ndim)</code>, get
-back <code>(N,)</code> log-likelihoods. The waveform for the whole batch is generated in a
-single backend call (<code>make_injections_to_ifo_batch</code>).</p>
+<p>All four likelihoods share one interface: construct with <code>(data, f, ifos_list, noise, template)</code>, call with a <strong>batch</strong> of parameter vectors <code>(N, ndim)</code>, get back <code>(N,)</code> log-likelihoods. The waveform for the whole batch is generated in a single backend call (<code>make_injections_to_ifo_batch</code>).</p>
 <h2 id="gaussian">Gaussian</h2>
 <p>The standard matched-filter likelihood
 <span class="arithmatex">\( \ln L = -\tfrac12 \langle d-h \,|\, d-h \rangle \)</span>.
@@ -685,24 +704,16 @@ Use when the noise is well-behaved and the PSD is trusted.</p>
 <h2 id="hyperbolic-heavy-tailed-the-hyperwave-default">Hyperbolic (heavy-tailed) — the HyperWave default</h2>
 <p>Replaces the Gaussian residual penalty with a hyperbolic one,
 <span class="arithmatex">\( \sum_f \sqrt{\delta^2 + |r(f)|^2} \)</span>, governed by per-segment shape
-parameters <span class="arithmatex">\((\alpha, \delta_i)\)</span> that are sampled alongside the signal. Large
-outliers (glitches, mis-modelled noise) are penalised <em>linearly</em> rather than
-quadratically, so they do not drag the fit. The shape parameters themselves
-diagnose non-Gaussianity (the <span class="arithmatex">\(\xi\)</span>–<span class="arithmatex">\(\chi\)</span> "shape triangle").</p>
+parameters <span class="arithmatex">\((\alpha, \delta_i)\)</span> that are sampled alongside the signal. Large outliers (glitches, mis-modelled noise) are penalised <em>linearly</em> rather than quadratically, so they do not drag the fit. The shape parameters themselves diagnose non-Gaussianity (the <span class="arithmatex">\(\xi\)</span>–<span class="arithmatex">\(\chi\)</span> "shape triangle").</p>
 <div class="highlight"><pre><span></span><code><span class="n">like</span> <span class="o">=</span> <span class="n">GWLikelihoods</span><span class="p">(</span><span class="o">...</span><span class="p">,</span> <span class="n">ddims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 <span class="n">logl</span> <span class="o">=</span> <span class="n">like</span><span class="o">.</span><span class="n">hyperbolic_classic</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>   <span class="c1"># thetas = [signal params, alpha, delta_0..3]</span>
 </code></pre></div>
 <h2 id="whittle-per-segment-noise-levels">Whittle (per-segment noise levels)</h2>
-<p>The Whittle likelihood with a free log-level per frequency segment — use when
-the PSD normalisation is uncertain but Gaussianity is acceptable.</p>
+<p>The Whittle likelihood with a free log-level per frequency segment — use when the PSD normalisation is uncertain but Gaussianity is acceptable.</p>
 <div class="highlight"><pre><span></span><code><span class="n">logl</span> <span class="o">=</span> <span class="n">like</span><span class="o">.</span><span class="n">whittle_level</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="heterodyne-relative-binning">Heterodyne (relative binning)</h2>
-<p>The Gaussian likelihood accelerated with the Zackay–Dai–Venumadhav scheme: a
-reference waveform <span class="arithmatex">\(h_0\)</span> is computed once, the smooth ratio <span class="arithmatex">\(h/h_0\)</span> is
-piecewise-linear over PN-spaced bins, and each evaluation needs the waveform
-only at the <strong>bin edges</strong> (a few hundred frequencies, via LAL's sequence API).
-Per-evaluation cost is independent of signal duration.</p>
+<p>The Gaussian likelihood accelerated with the Zackay–Dai–Venumadhav scheme: a reference waveform <span class="arithmatex">\(h_0\)</span> is computed once, the smooth ratio <span class="arithmatex">\(h/h_0\)</span> is piecewise-linear over PN-spaced bins, and each evaluation needs the waveform only at the <strong>bin edges</strong> (a few hundred frequencies, via LAL's sequence API). Per-evaluation cost is independent of signal duration.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.likelihoods</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeterodyneLikelihood</span>
 
 <span class="n">het</span> <span class="o">=</span> <span class="n">HeterodyneLikelihood</span><span class="o">.</span><span class="n">from_lvk_template</span><span class="p">(</span>
@@ -750,6 +761,18 @@ reference point; logL-difference errors scale as <code>eps**2</code>. Validate a
 the full likelihood when changing <code>eps</code> (the test suite includes this
 check).</p>
 </div>
+<h2 id="heterodyned-hyperbolic-relative-binning-for-the-robust-likelihood">Heterodyned hyperbolic (relative binning for the robust likelihood)</h2>
+<p>The hyperbolic square root cannot be binned exactly, but
+<code>HeterodynedHyperbolicLikelihood</code> implements a <strong>first+second-order heterodyne around the reference residual</strong>: per-bin summaries with reference-fixed weights <span class="arithmatex">\(w(f;\delta)\)</span>, and the sampled <span class="arithmatex">\(\delta\)</span> handled by tabulating summaries on a <span class="arithmatex">\(\delta\)</span>-grid (splines for the dominant term). Measured: <strong>47–53×</strong> at 64 s (18.9 → 0.4 ms/eval), ~3× at 4 s; logL accuracy ~0.2 in the posterior bulk (same trust region as Gaussian relative binning). The exact hyperbolic remains available in <code>GWLikelihoods</code> — use it for final checks.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.likelihoods</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeterodynedHyperbolicLikelihood</span>
+<span class="n">het_hyp</span> <span class="o">=</span> <span class="n">HeterodynedHyperbolicLikelihood</span><span class="o">.</span><span class="n">from_lvk_template</span><span class="p">(</span>
+    <span class="n">template</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">psd</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+    <span class="n">theta_ref</span><span class="o">=</span><span class="n">theta_ref</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+<span class="n">logl</span> <span class="o">=</span> <span class="n">het_hyp</span><span class="o">.</span><span class="n">logl</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>   <span class="c1"># theta = [waveform, alpha, delta_0..delta_n]</span>
+</code></pre></div>
+<p>A middle option, <code>InterpolatedWaveformTemplate</code>, bins only the <em>waveform</em>
+(edge evaluation + ratio interpolation) and keeps the likelihood exact —
+2.4–3.8× with &lt;0.5% error, also valid for Whittle.</p>
 <h2 id="choosing">Choosing</h2>
 <table>
 <thead>
@@ -774,6 +797,10 @@ check).</p>
 <tr>
 <td>long signals (BNS), production PE throughput</td>
 <td><code>HeterodyneLikelihood</code></td>
+</tr>
+<tr>
+<td>robust likelihood at production throughput</td>
+<td><code>HeterodynedHyperbolicLikelihood</code> (exact hyperbolic for final checks)</td>
 </tr>
 </tbody>
 </table>

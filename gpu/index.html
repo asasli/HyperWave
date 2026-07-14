@@ -731,8 +731,9 @@ a high-frequency amplitude rolloff above ~512 Hz. PE in the
 zero/aligned-spin configuration is verified unbiased.</p>
 </div>
 <h3 id="lisa-bbhx-and-gbgpu">LISA: bbhx and GBGPU</h3>
-<p>See <a href="../lisa/">LISA</a> — both engines are natively batched and integrate through
-the same <code>make_injections_to_ifo_batch</code> fast path.</p>
+<p>Both engines are natively batched and integrate through the same
+<code>make_injections_to_ifo_batch</code> fast path — see <a href="../lisa/">LISA</a>.
+<strong>bbhx runs on A100 GPUs</strong> (cuda12x source build): SMBHB PE end-to-end in 57.9 s (vs 111 s CPU), batch-128 waveform generation 6.3× faster. GBGPU's GPU path awaits its new-API migration (tracked in <code>TODO.md</code>).</p>
 <h2 id="vectorization-why-batching-matters-more-than-the-device">Vectorization (why batching matters more than the device)</h2>
 <p>Both samplers evaluate the likelihood with <code>vectorize=True</code>: the entire walker
 population arrives as one <code>(N, ndim)</code> batch, the template generates all <code>N</code>

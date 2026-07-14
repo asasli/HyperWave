@@ -375,6 +375,24 @@
         
       
       
+        <label class="md-nav__link md-nav__link--active" for="__toc">
+          
+  
+  
+  <span class="md-ellipsis">
+    
+  
+    Wavelet reconstruction
+  
+
+    
+  </span>
+  
+  
+
+          <span class="md-nav__icon md-icon"></span>
+        </label>
+      
       <a href="./" class="md-nav__link md-nav__link--active">
         
   
@@ -391,6 +409,75 @@
   
 
       </a>
+      
+        
+
+<nav class="md-nav md-nav--secondary" aria-label="Table of contents">
+  
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#proposal-cascade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposal cascade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposal cascade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matched-filter-births-mffisher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matched-filter births (mffisher)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#in-model-moves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-model moves
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the output
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
+</nav>
       
     </li>
   
@@ -497,6 +584,64 @@
     
   
   
+    <label class="md-nav__title" for="__toc">
+      <span class="md-nav__icon md-icon"></span>
+      Table of contents
+    </label>
+    <ul class="md-nav__list" data-md-component="toc" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#proposal-cascade" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Proposal cascade
+      
+    </span>
+  </a>
+  
+    <nav class="md-nav" aria-label="Proposal cascade">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#matched-filter-births-mffisher" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Matched-filter births (mffisher)
+      
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#in-model-moves" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        In-model moves
+      
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#reading-the-output" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Reading the output
+      
+    </span>
+  </a>
+  
+</li>
+      
+    </ul>
+  
 </nav>
                   </div>
                 </div>
@@ -517,14 +662,68 @@
 
 <h1 id="wavelet-reconstruction">Wavelet reconstruction</h1>
 <p>Model-agnostic signal reconstruction with Morlet–Gabor wavelets and
-reversible-jump MCMC (Eryn), in the spirit of BayesWave: the number of wavelets
-is itself sampled, an SNR prior supplies the Occam penalty, and an optional
-extrinsic branch samples the sky position (<span class="arithmatex">\(\mathrm{ra}\)</span>, <span class="arithmatex">\(\mathrm{dec}\)</span>,
-<span class="arithmatex">\(\psi\)</span>, ellipticity).</p>
-<div class="highlight"><pre><span></span><code>python<span class="w"> </span>examples/bbh_wavelet_reconstruction.py<span class="w"> </span><span class="se">\</span>
-<span class="w">    </span>--proposal<span class="w"> </span>mffisher<span class="w"> </span>--sample-sky<span class="w"> </span><span class="se">\</span>
+reversible-jump MCMC (Eryn), in the spirit of BayesWave: the number of wavelets is itself sampled, an SNR prior supplies the Occam penalty, and an optional extrinsic branch samples the sky position (<code>ra</code>, <code>dec</code>, <code>psi</code>, ellipticity).</p>
+<div class="highlight"><pre><span></span><code>python<span class="w"> </span>examples/bbh_wavelet_reconstruction.py<span class="w"> </span>--proposal<span class="w"> </span>mffisher<span class="w"> </span>--sample-sky<span class="w"> </span><span class="se">\</span>
 <span class="w">    </span>--nwalkers<span class="w"> </span><span class="m">50</span><span class="w"> </span>--ntemps<span class="w"> </span><span class="m">10</span><span class="w"> </span>--nsteps<span class="w"> </span><span class="m">30000</span><span class="w"> </span>--burn<span class="w"> </span><span class="m">10000</span><span class="w"> </span>--device<span class="w"> </span>gpu
 </code></pre></div>
+<h2 id="proposal-cascade">Proposal cascade</h2>
+<p>Reconstruction quality is set almost entirely by the proposals. HyperWave ships, in increasing order of sophistication (<code>--proposal</code>):</p>
+<table>
+<thead>
+<tr>
+<th>mode</th>
+<th>births</th>
+<th>in-model</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>standard</code></td>
+<td>prior draws</td>
+<td>stretch</td>
+</tr>
+<tr>
+<td><code>guided</code></td>
+<td>data-informed <span class="arithmatex">\((t_0, f_0)\)</span> placement</td>
+<td>stretch</td>
+</tr>
+<tr>
+<td><code>fisher</code></td>
+<td>data-informed placement</td>
+<td><strong>Fisher</strong> + half-cycle + sky-ring</td>
+</tr>
+<tr>
+<td><code>mffisher</code></td>
+<td><strong>matched-filter</strong> (data-fitted SNR + phase)</td>
+<td>Fisher + half-cycle + sky-ring</td>
+</tr>
+<tr>
+<td><code>flow</code> / <code>flowfisher</code></td>
+<td>learned normalizing flow</td>
+<td>stretch / Fisher</td>
+</tr>
+</tbody>
+</table>
+<h3 id="matched-filter-births-mffisher">Matched-filter births (<code>mffisher</code>)</h3>
+<p>Placement alone is not enough: a wavelet born at the right <span class="arithmatex">\((t_0, f_0)\)</span> with prior-random amplitude and phase still mismatches the data and dies. The matched-filter birth fits the <em>linear</em> parameters from the data at the proposed location,</p>
+<div class="arithmatex">\[ z_k = 4\,\Delta f \sum_f \frac{d_k(f)\, \bar w_0(f)}{S_k(f)}, \]</div>
+<p>and proposes <span class="arithmatex">\(\mathrm{SNR} \sim \mathcal{N}_{\rm trunc}(\hat\rho, 1.5)\)</span>,
+<span class="arithmatex">\(\phi_0 \sim \mathrm{VonMises}(\arg z, 8)\)</span>, each mixed 20% with the prior so death moves keep finite reverse densities. <code>rvs</code> and <code>logpdf</code> evaluate the same deterministic fit, so the reversible-jump Hastings ratio remains <strong>exact</strong>.</p>
+<h3 id="in-model-moves">In-model moves</h3>
+<ul>
+<li><strong>Fisher</strong> — local jumps scaled by the per-wavelet Fisher matrix (BayesWave's
+  workhorse).</li>
+<li><strong>Half-cycle</strong> — <span class="arithmatex">\(t_0 \to t_0 \pm 1/(2 f_0)\)</span> with a phase flip (the wavelet
+  degeneracy).</li>
+<li><strong>Sky-ring</strong> — rotates the sky position about the two-detector baseline,
+  updating arrival-time-consistent parameters.</li>
+</ul>
+<h2 id="reading-the-output">Reading the output</h2>
+<p>The example writes an <code>.npz</code> with the reconstruction posterior:
+per-draw network overlap with the injection, the recovered SNR, the
+<span class="arithmatex">\(p(n_\text{wavelets})\)</span> posterior, and acceptance rates (<code>im_acc</code>, <code>rj_acc</code>).</p>
+<p>Current benchmark (BBH injection, network SNR ~46, sampled sky): overlap
+0.94 with the <code>fisher</code> cascade; BayesWave reaches 0.994 on the same data — the matched-filter births are the active work to close that gap (RJ acceptance 0.07 → 0.11 already in smoke tests).</p>
 
 
 
