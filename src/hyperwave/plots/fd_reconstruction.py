@@ -118,6 +118,7 @@ def plot_fd_reconstruction(
     reconstruction_dict,
     signal_fd=None,
     case="hyperbolic",
+    label=None,
     title="",
     xlabel="Frequency [Hz]",
     ylabel=r'$|\tilde{h}(f)|~\sqrt{2\Delta f}$ & $\sqrt{S(f)}$ $\quad$ $\left[\sqrt{\rm{Hz^{-1}}}\right]$',
@@ -182,7 +183,7 @@ def plot_fd_reconstruction(
     line = Line2D([0], [0], color=reconstruction_color, lw=1.1)
 
     legend_handles = [(patch, line)]
-    legend_labels = [f"{case.title()}: median & 90% CI"]
+    legend_labels = [label if label is not None else f"{case.title()}: median & 90% CI"]
 
     if signal_fd is not None:
         inj_line = Line2D([0], [0], color=signal_color, lw=1.0)

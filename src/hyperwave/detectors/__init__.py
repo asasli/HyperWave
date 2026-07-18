@@ -15,8 +15,13 @@ Instrument-specific layers: :mod:`~hyperwave.detectors.lvk`,
 :mod:`~hyperwave.detectors.lisa`.
 """
 
-from . import data, geometry, lisa, lvk, psd, strain, waveforms
-from .calibration import CubicSpline, Precomputed, Recalibrate
+from . import conditioning, data, geometry, lisa, lvk, psd, strain, waveforms
+from .calibration import (
+    CubicSpline,
+    Precomputed,
+    Recalibrate,
+)
+from .conditioning import condition_band, find_spectral_lines, whiteness_report
 from .data import Interferometer, InterferometerList
 from .geometry import Detector
 from .psd import PowerSpectralDensity
@@ -34,6 +39,10 @@ __all__ = [
     "Recalibrate",
     "CubicSpline",
     "Precomputed",
+    "condition_band",
+    "find_spectral_lines",
+    "whiteness_report",
+    "conditioning",
     "geometry",
     "psd",
     "strain",

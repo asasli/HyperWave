@@ -90,7 +90,7 @@ def make_priors(nsegs):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--sampler", choices=["eryn", "pocomc"], default="pocomc")
+    p.add_argument("--sampler", choices=["eryn", "pocomc", "dynesty"], default="pocomc")
     p.add_argument("--nsegs", type=int, default=4)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--workers", type=int, default=8)
@@ -135,6 +135,9 @@ def main():
                       update_fn=callback, update_iterations=args.flow_train_every)
             print(f"[flow] {args.flow_frac:.0%} flow independence proposal, "
                   f"retrain every {args.flow_train_every} iters")
+    elif args.sampler == "dynesty":
+        kw = dict(nlive=200, dlogz=1.0) if args.quick \
+            else dict(nlive=500, walks=100, dlogz=0.1)
     else:
         kw = dict(n_total=2000, n_effective=512, n_active=256) if args.quick \
             else dict(n_total=50000, n_effective=8000, n_active=2000)

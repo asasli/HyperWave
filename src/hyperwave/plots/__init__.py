@@ -1,6 +1,6 @@
 """Plotting utilities for HyperWave."""
 
-from . import fd_reconstruction, td_reconstruction
+from . import fd_reconstruction, td_reconstruction, wavelet_reconstruction
 from .corners import (
     half_violin,
     plot_half_violin_parameter,
@@ -9,11 +9,6 @@ from .corners import (
     plot_posterior,
 )
 from .hyper import Shape
-
-try:
-    from . import wavelet_reconstruction
-except ImportError:
-    wavelet_reconstruction = None
 
 __all__ = [
     "plot_posterior",

@@ -37,8 +37,9 @@ template = GW(noise, approximant="IMRPhenomPv2",
 
 ### LISA: bbhx and GBGPU
 
-See [LISA](lisa.md) — both engines are natively batched and integrate through
-the same `make_injections_to_ifo_batch` fast path.
+Both engines are natively batched and integrate through the same
+`make_injections_to_ifo_batch` fast path — see [LISA](lisa.md).
+**bbhx runs on A100 GPUs** (cuda12x source build): SMBHB PE end-to-end in 57.9 s (vs 111 s CPU), batch-128 waveform generation 6.3× faster. GBGPU's GPU path awaits its new-API migration (tracked in `TODO.md`).
 
 ## Vectorization (why batching matters more than the device)
 
