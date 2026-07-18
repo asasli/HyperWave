@@ -15,6 +15,7 @@ and time-delay helpers.
 
 from __future__ import annotations
 
+from .calibration import Recalibrate
 from .geometry import get_detector
 from .psd import PowerSpectralDensity
 from .strain import DEFAULT_ROLL_OFF, StrainData
@@ -30,9 +31,13 @@ class Interferometer:
         minimum_frequency=20.0,
         maximum_frequency=2048.0,
         roll_off=DEFAULT_ROLL_OFF,
+        calibration_model=None,
     ):
         self.name = str(name)
         self.detector = get_detector(self.name)
+        self.calibration_model = (
+            calibration_model if calibration_model is not None else Recalibrate()
+        )
         self.strain_data = StrainData(sampling_frequency, duration, start_time, roll_off)
         self.power_spectral_density: PowerSpectralDensity | None = None
         self.minimum_frequency = float(minimum_frequency)

@@ -216,6 +216,7 @@ class HeterodyneLikelihood(BaseLikelihood):
             backend="lal",
             trigger_time=low.trigger_time,
             sequence=True,
+            calibration_models=getattr(low, "calibration_models", None),
         )
 
         def waveform_edges(thetas):
@@ -265,6 +266,7 @@ class InterpolatedWaveformTemplate:
             approximant=low.approximant, parameters=low.parameters,
             static_parameters=low.static_parameters, backend="lal",
             trigger_time=low.trigger_time, sequence=True,
+            calibration_models=getattr(low, "calibration_models", None),
         )
         h0_edge = h0[:, edge_idx]
         tiny = 1e-3 * np.max(np.abs(h0), axis=1, keepdims=True)
@@ -515,6 +517,7 @@ class HeterodynedHyperbolicLikelihood(BaseLikelihood):
             approximant=low.approximant, parameters=low.parameters,
             static_parameters=low.static_parameters, backend="lal",
             trigger_time=low.trigger_time, sequence=True,
+            calibration_models=getattr(low, "calibration_models", None),
         )
         like._waveform_edges = lambda th: np.asarray(
             edge_template.make_injections_to_ifo_batch(th))

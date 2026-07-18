@@ -22,8 +22,8 @@ from __future__ import annotations
 import numpy as np
 
 try:
-    from eryn.prior import ProbDistContainer, uniform_dist
     from eryn.moves import GroupStretchMove
+    from eryn.prior import ProbDistContainer, uniform_dist
 except ImportError as exc:  # pragma: no cover - eryn is a core dependency
     raise ImportError("Wavelet proposals require Eryn (eryn.prior).") from exc
 
@@ -348,7 +348,7 @@ def _wavelet_fisher_sigma(p, snr_floor):
     amplitude parameter *is* the per-wavelet SNR, no PSD is needed: the wavelet's
     own ``snr`` (floored) sets the scale. ``p`` is ``(n, 5)``; returns ``(n, 5)``.
     """
-    t0, f0, Q, snr = p[:, 0], p[:, 1], p[:, 2], p[:, 3]
+    f0, Q, snr = p[:, 1], p[:, 2], p[:, 3]
     SNR = np.maximum(np.abs(snr), snr_floor)
     inv = 1.0 / SNR
     Qsq = Q * Q

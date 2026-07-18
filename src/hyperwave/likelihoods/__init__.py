@@ -10,6 +10,7 @@ from .heterodyne import (
     InterpolatedWaveformTemplate,
     heterodyne_bin_edges,
 )
+from .time_domain import TimeDomainGWLikelihoods
 from .wavelet import WaveletLikelihood
 
 __all__ = [
@@ -18,6 +19,7 @@ __all__ = [
     "HeterodyneLikelihood",
     "HeterodynedHyperbolicLikelihood",
     "InterpolatedWaveformTemplate",
+    "TimeDomainGWLikelihoods",
     "heterodyne_bin_edges",
     "LogLike",
     "loglike",
