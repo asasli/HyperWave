@@ -15,7 +15,7 @@ drives the (expensive) injection + recovery loop that produces those results.
 
 from __future__ import annotations
 
-from typing import Mapping, Optional, Sequence
+from typing import Optional, Sequence
 
 import numpy as np
 from scipy import stats
