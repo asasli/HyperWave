@@ -105,6 +105,7 @@ def plot_td_reconstruction(
     signal_td=None,
     data_td=None,
     case="hyperbolic",
+    label=None,
     title="",
     xlabel=r"$t-t_{ref}$ [s]",
     ylabel="Strain",
@@ -168,7 +169,7 @@ def plot_td_reconstruction(
         reconstruction_dict["median"],
         color=reconstruction_color,
         lw=0.9,
-        label=f"Reconstruction ({case.title()})",
+        label=label if label is not None else f"Reconstruction ({case.title()})",
     )
 
     # --- Confidence region ---

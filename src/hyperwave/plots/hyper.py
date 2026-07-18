@@ -1,6 +1,7 @@
 import matplotlib
 import matplotlib.pyplot as plt
 import numpy as np
+from matplotlib.cm import get_cmap
 
 fig_width_pt = 246.0  # Get this from LaTeX using \showthe\columnwidth
 inches_per_pt = 1.0/72.27               # Convert pt to inch
@@ -94,7 +95,7 @@ class Shape:
         self.labels = labels
         self.alpha_dim = int(self.samples.shape[1] / 2) if ddims else 1
         self.ndims = self.alpha_dim
-        cmap = matplotlib.colormaps['nipy_spectral']  # Using a neon-like colormap
+        cmap = get_cmap('nipy_spectral')  # Using a neon-like colormap
         self.clr = [cmap(i / max(self.ndims, 1)) for i in range(self.ndims)]
 
         a = self.samples[:, 0:self.alpha_dim]
@@ -206,3 +207,4 @@ class Shape:
             plt.savefig(self.save_name + 'data_gaussianity.pdf', dpi=300, bbox_inches='tight', transparent=True)
 
         plt.show()
+

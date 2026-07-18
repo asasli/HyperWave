@@ -104,7 +104,7 @@ def make_priors(nsegs):
 
 def main():
     p = argparse.ArgumentParser(description=__doc__)
-    p.add_argument("--sampler", choices=["eryn", "pocomc"], default="eryn")
+    p.add_argument("--sampler", choices=["eryn", "pocomc", "dynesty"], default="eryn")
     p.add_argument("--nsegs", type=int, default=2)
     p.add_argument("--seed", type=int, default=42)
     p.add_argument("--outdir", default="results/pe_fast")
@@ -119,6 +119,9 @@ def main():
     if args.sampler == "eryn":
         kw = dict(nwalkers=20, ntemps=4, burn=50, nsteps=100) if args.quick \
             else dict(nwalkers=40, ntemps=10, burn=3000, nsteps=8000)
+    elif args.sampler == "dynesty":
+        kw = dict(nlive=200, dlogz=1.0) if args.quick \
+            else dict(nlive=500, walks=100, dlogz=0.1)
     else:
         kw = dict(n_total=2000, n_effective=512, n_active=256) if args.quick \
             else dict(n_total=30000, n_effective=4000, n_active=1000)

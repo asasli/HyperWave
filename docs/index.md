@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="assets/logo.png" alt="HyperWave logo" height="220" />
-</p>
-
 # HyperWave
 
 **Fast, robust Bayesian inference for gravitational-wave data.**
@@ -19,8 +15,9 @@ run with `vectorize=True` end to end.
 |---|---|
 | **Four likelihoods** | Gaussian, hyperbolic (heavy-tailed), Whittle (per-segment levels), and heterodyne/relative-binning — one shared template/PSD interface |
 | **Heterodyne speed** | per-evaluation cost independent of signal duration (~0.3 ms); measured 4.9× (4 s BBH) to 68.6× (64 s) over the full Gaussian likelihood |
+| **Benchmark** | 64-s signal, same data/priors: eryn+heterodyne 659 s vs bilby+dynesty 4409 s (**6.7×**), max JS 0.006 |
 | **GPU waveforms** | ml4gw (Torch) batched CBC generation; bbhx (SMBHB) and GBGPU (galactic binaries) for LISA; CuPy likelihood algebra with automatic CPU fallback |
-| **Wavelet reconstruction** | Morlet–Gabor RJMCMC with Fisher, half-cycle, sky-ring and matched-filter birth proposals |
+| **Wavelet reconstruction** | BayesWave-style Morlet–Gabor RJMCMC with Fisher, half-cycle, sky-ring and matched-filter birth proposals |
 | **LISA** | A/E/T bridge to lisatools-style data products; end-to-end SMBHB and UCB examples |
 | **Validation** | `Result` objects, PP-test machinery, calibrated/biased/overconfident detection tests |
 | **Bilby boundary** | bilby priors plus LVK/bilby calibration response-curve file readers; waveform projection and likelihood evaluation stay HyperWave-native and batched |
