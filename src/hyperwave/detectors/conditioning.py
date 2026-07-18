@@ -23,7 +23,6 @@ per bin for stationary Gaussian noise (real+imag, unit variance each).
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import Optional, Sequence, Tuple
 
 import numpy as np
 

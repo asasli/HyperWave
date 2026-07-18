@@ -18,15 +18,14 @@ Usage sketch (in the example script):
 
 from __future__ import annotations
 
-import os
 from typing import Optional
 
 import numpy as np
 
 from .flow_birth import (
+    _WAVELET_DIM,
     FlowBirthConfig,
     FlowBirthModel,
-    _WAVELET_DIM,
     _tf_image,
     denormalize_wavelet,
     normalize_wavelet,

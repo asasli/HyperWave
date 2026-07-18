@@ -16,8 +16,12 @@ Instrument-specific layers: :mod:`~hyperwave.detectors.lvk`,
 """
 
 from . import conditioning, data, geometry, lisa, lvk, psd, strain, waveforms
+from .calibration import (
+    CubicSpline,
+    Precomputed,
+    Recalibrate,
+)
 from .conditioning import condition_band, find_spectral_lines, whiteness_report
-from .calibration import SplineCalibration, make_calibration_bank
 from .data import Interferometer, InterferometerList
 from .geometry import Detector
 from .psd import PowerSpectralDensity
@@ -32,8 +36,13 @@ __all__ = [
     "InterferometerList",
     "Template",
     "WaveletTemplate",
-    "SplineCalibration",
-    "make_calibration_bank",
+    "Recalibrate",
+    "CubicSpline",
+    "Precomputed",
+    "condition_band",
+    "find_spectral_lines",
+    "whiteness_report",
+    "conditioning",
     "geometry",
     "psd",
     "strain",

@@ -9,12 +9,15 @@ try:  # Prefer distribution version if installed
 except metadata.PackageNotFoundError:
     pass
 
-from . import detectors, plots
+from . import detectors, plots, validation
 from .detectors import (
+    CubicSpline,
     Detector,
     Interferometer,
     InterferometerList,
     PowerSpectralDensity,
+    Precomputed,
+    Recalibrate,
     StrainData,
     Template,
     WaveletTemplate,
@@ -44,7 +47,6 @@ from .likelihoods import (
 from .ml4gw import ml4gw_available, torch_cuda_available
 from .result import Result
 from .utils import load_object, save_object
-from . import validation
 
 __all__ = [
     "__version__",
@@ -75,6 +77,9 @@ __all__ = [
     "StrainData",
     "Interferometer",
     "InterferometerList",
+    "Recalibrate",
+    "CubicSpline",
+    "Precomputed",
     "Template",
     "WaveletTemplate",
     "DetectorNoise",
