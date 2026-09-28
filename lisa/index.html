@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -687,14 +687,14 @@ the batched path — plugs in directly:</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.detectors.lisa</span><span class="w"> </span><span class="kn">import</span> <span class="n">LISAAETTemplate</span><span class="p">,</span> <span class="n">build_lisa_aet_likelihood</span>
 
 <span class="n">template</span> <span class="o">=</span> <span class="n">LISAAETTemplate</span><span class="p">(</span>
-    <span class="n">parameters</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;m1&quot;</span><span class="p">,</span> <span class="s2">&quot;m2&quot;</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
+    <span class="n">parameters</span><span class="o">=</span><span class="p">[</span><span class="s2">"m1"</span><span class="p">,</span> <span class="s2">"m2"</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span>
     <span class="n">signal_model</span><span class="o">=</span><span class="n">my_generator</span><span class="p">,</span>            <span class="c1"># kwargs -&gt; (2, nfreq)</span>
     <span class="n">batch_signal_model</span><span class="o">=</span><span class="n">my_batch_generator</span><span class="p">,</span>  <span class="c1"># arrays -&gt; (N, 2, nfreq)</span>
-    <span class="n">channels</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">),</span>
+    <span class="n">channels</span><span class="o">=</span><span class="p">(</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">),</span>
 <span class="p">)</span>
 <span class="n">like</span> <span class="o">=</span> <span class="n">build_lisa_aet_likelihood</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span>
                                  <span class="n">sensitivity</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">freqs</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span>
-                                 <span class="n">channels</span><span class="o">=</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">,</span> <span class="s2">&quot;E&quot;</span><span class="p">),</span> <span class="n">ddims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+                                 <span class="n">channels</span><span class="o">=</span><span class="p">(</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">),</span> <span class="n">ddims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
 
 
@@ -754,7 +754,7 @@ the batched path — plugs in directly:</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

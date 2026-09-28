@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -628,7 +628,7 @@
 
 <h1 id="quickstart">Quickstart</h1>
 <h2 id="install">Install</h2>
-<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hyperwave[plot,sampling]&quot;</span>
+<div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"hyperwave[plot,sampling]"</span>
 </code></pre></div>
 <h2 id="a-complete-fast-pe-run">A complete fast PE run</h2>
 <p>The 2-parameter "fast PE" demo recovers chirp mass and mass ratio with the
@@ -642,13 +642,13 @@ hyperbolic likelihood in minutes on a laptop. The full script is
 
 <span class="c1"># 1. data: Gaussian noise + a BBH injection</span>
 <span class="n">trigger</span> <span class="o">=</span> <span class="mf">1268189526.951953</span>
-<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">&quot;chirp_mass&quot;</span><span class="p">,</span> <span class="s2">&quot;mass_ratio&quot;</span><span class="p">]</span>
+<span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s2">"chirp_mass"</span><span class="p">,</span> <span class="s2">"mass_ratio"</span><span class="p">]</span>
 <span class="n">theta_true</span> <span class="o">=</span> <span class="p">[</span><span class="mf">28.1</span><span class="p">,</span> <span class="mf">0.806</span><span class="p">]</span>
 
-<span class="n">noise</span> <span class="o">=</span> <span class="n">DetectorNoise</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">2048.0</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="n">DetectorNoise</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">2048.0</span><span class="p">,</span> <span class="n">trigger</span><span class="p">,</span> <span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span>
                       <span class="n">minimum_frequency</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">maximum_frequency</span><span class="o">=</span><span class="mf">512.0</span><span class="p">)</span>
 <span class="n">noise</span><span class="o">.</span><span class="n">generate_noise</span><span class="p">(</span><span class="n">real_noise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-<span class="n">template</span> <span class="o">=</span> <span class="n">GW</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">approximant</span><span class="o">=</span><span class="s2">&quot;IMRPhenomPv2&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+<span class="n">template</span> <span class="o">=</span> <span class="n">GW</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">approximant</span><span class="o">=</span><span class="s2">"IMRPhenomPv2"</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
               <span class="n">static_parameters</span><span class="o">=</span><span class="p">{</span><span class="o">...</span><span class="p">})</span>           <span class="c1"># fix the extrinsic parameters</span>
 <span class="n">template</span><span class="o">.</span><span class="n">make_injections_to_ifo</span><span class="p">(</span><span class="n">theta_true</span><span class="p">)</span>
 
@@ -656,21 +656,21 @@ hyperbolic likelihood in minutes on a laptop. The full script is
 <span class="n">f</span><span class="p">,</span> <span class="n">asd0</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">detector_asd_masked</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
 <span class="n">psd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">asd0</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">template</span><span class="o">.</span><span class="n">detector_asd_masked</span><span class="p">(</span><span class="mi">1</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
 <span class="n">data</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">template</span><span class="o">.</span><span class="n">detector_data_fd</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">template</span><span class="o">.</span><span class="n">detector_data_fd</span><span class="p">(</span><span class="mi">1</span><span class="p">)])</span>
-<span class="n">like</span> <span class="o">=</span> <span class="n">GWLikelihoods</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span> <span class="n">noise</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span>
+<span class="n">like</span> <span class="o">=</span> <span class="n">GWLikelihoods</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span> <span class="n">noise</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span>
                      <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">ddims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
 <span class="c1"># 3. priors: science parameters + hyperbolic shape parameters</span>
 <span class="n">priors</span> <span class="o">=</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">PriorDict</span><span class="p">()</span>
-<span class="n">priors</span><span class="p">[</span><span class="s2">&quot;chirp_mass&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bilby</span><span class="o">.</span><span class="n">gw</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">UniformInComponentsChirpMass</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
-<span class="n">priors</span><span class="p">[</span><span class="s2">&quot;mass_ratio&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">bilby</span><span class="o">.</span><span class="n">gw</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">UniformInComponentsMassRatio</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
-<span class="n">noise_priors</span> <span class="o">=</span> <span class="p">{</span><span class="sa">r</span><span class="s2">&quot;$\alpha$&quot;</span><span class="p">:</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
-                <span class="sa">r</span><span class="s2">&quot;$\delta_0$&quot;</span><span class="p">:</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
-                <span class="sa">r</span><span class="s2">&quot;$\delta_1$&quot;</span><span class="p">:</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">)}</span>
+<span class="n">priors</span><span class="p">[</span><span class="s2">"chirp_mass"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bilby</span><span class="o">.</span><span class="n">gw</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">UniformInComponentsChirpMass</span><span class="p">(</span><span class="mi">25</span><span class="p">,</span> <span class="mi">31</span><span class="p">)</span>
+<span class="n">priors</span><span class="p">[</span><span class="s2">"mass_ratio"</span><span class="p">]</span> <span class="o">=</span> <span class="n">bilby</span><span class="o">.</span><span class="n">gw</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">UniformInComponentsMassRatio</span><span class="p">(</span><span class="mf">0.5</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">)</span>
+<span class="n">noise_priors</span> <span class="o">=</span> <span class="p">{</span><span class="sa">r</span><span class="s2">"$\alpha$"</span><span class="p">:</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+                <span class="sa">r</span><span class="s2">"$\delta_0$"</span><span class="p">:</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">),</span>
+                <span class="sa">r</span><span class="s2">"$\delta_1$"</span><span class="p">:</span> <span class="n">bilby</span><span class="o">.</span><span class="n">core</span><span class="o">.</span><span class="n">prior</span><span class="o">.</span><span class="n">Uniform</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">30</span><span class="p">)}</span>
 
-<span class="c1"># 4. sample (eryn here; sampler_name=&quot;pocomc&quot; also works)</span>
-<span class="n">inf</span> <span class="o">=</span> <span class="n">LVKinference</span><span class="p">(</span><span class="n">like</span><span class="o">.</span><span class="n">hyperbolic_classic</span><span class="p">,</span> <span class="n">sampler_name</span><span class="o">=</span><span class="s2">&quot;eryn&quot;</span><span class="p">,</span>
+<span class="c1"># 4. sample (eryn here; sampler_name="pocomc" also works)</span>
+<span class="n">inf</span> <span class="o">=</span> <span class="n">LVKinference</span><span class="p">(</span><span class="n">like</span><span class="o">.</span><span class="n">hyperbolic_classic</span><span class="p">,</span> <span class="n">sampler_name</span><span class="o">=</span><span class="s2">"eryn"</span><span class="p">,</span>
                    <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span> <span class="n">noise_priors</span><span class="o">=</span><span class="n">noise_priors</span><span class="p">,</span>
-                   <span class="n">common_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;save_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;TAG&quot;</span><span class="p">:</span> <span class="s2">&quot;fast&quot;</span><span class="p">,</span> <span class="s2">&quot;like&quot;</span><span class="p">:</span> <span class="s2">&quot;hyperbolic&quot;</span><span class="p">},</span>
+                   <span class="n">common_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"save_dir"</span><span class="p">:</span> <span class="s2">"out"</span><span class="p">,</span> <span class="s2">"TAG"</span><span class="p">:</span> <span class="s2">"fast"</span><span class="p">,</span> <span class="s2">"like"</span><span class="p">:</span> <span class="s2">"hyperbolic"</span><span class="p">},</span>
                    <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">nwalkers</span><span class="o">=</span><span class="mi">32</span><span class="p">,</span> <span class="n">ntemps</span><span class="o">=</span><span class="mi">8</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">2000</span><span class="p">,</span> <span class="n">nsteps</span><span class="o">=</span><span class="mi">8000</span><span class="p">))</span>
 <span class="n">inf</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 
@@ -678,7 +678,7 @@ hyperbolic likelihood in minutes on a laptop. The full script is
 <span class="n">result</span> <span class="o">=</span> <span class="n">inf</span><span class="o">.</span><span class="n">get_result</span><span class="p">(</span><span class="n">injection</span><span class="o">=</span><span class="n">theta_true</span><span class="p">,</span> <span class="n">parameter_names</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
 <span class="nb">print</span><span class="p">(</span><span class="n">result</span><span class="o">.</span><span class="n">median</span><span class="p">(),</span> <span class="n">result</span><span class="o">.</span><span class="n">credible_interval</span><span class="p">())</span>
 <span class="n">result</span><span class="o">.</span><span class="n">corner</span><span class="p">()</span>                       <span class="c1"># corner plot</span>
-<span class="n">result</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">&quot;out/fast_pe.h5&quot;</span><span class="p">)</span>
+<span class="n">result</span><span class="o">.</span><span class="n">save</span><span class="p">(</span><span class="s2">"out/fast_pe.h5"</span><span class="p">)</span>
 </code></pre></div>
 <h2 id="where-to-go-next">Where to go next</h2>
 <ul>
@@ -746,7 +746,7 @@ hyperbolic likelihood in minutes on a laptop. The full script is
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

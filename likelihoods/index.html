@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -29,7 +29,7 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
@@ -717,7 +717,7 @@ parameters <span class="arithmatex">\((\alpha, \delta_i)\)</span> that are sampl
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.likelihoods</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeterodyneLikelihood</span>
 
 <span class="n">het</span> <span class="o">=</span> <span class="n">HeterodyneLikelihood</span><span class="o">.</span><span class="n">from_lvk_template</span><span class="p">(</span>
-    <span class="n">template</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">psd</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+    <span class="n">template</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">psd</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span>
     <span class="n">theta_ref</span><span class="o">=</span><span class="n">theta_ref</span><span class="p">,</span>    <span class="c1"># injection or trigger point</span>
     <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>                <span class="c1"># max per-bin differential phase [rad]</span>
 <span class="p">)</span>
@@ -766,7 +766,7 @@ check).</p>
 <code>HeterodynedHyperbolicLikelihood</code> implements a <strong>first+second-order heterodyne around the reference residual</strong>: per-bin summaries with reference-fixed weights <span class="arithmatex">\(w(f;\delta)\)</span>, and the sampled <span class="arithmatex">\(\delta\)</span> handled by tabulating summaries on a <span class="arithmatex">\(\delta\)</span>-grid (splines for the dominant term). Measured: <strong>47–53×</strong> at 64 s (18.9 → 0.4 ms/eval), ~3× at 4 s; logL accuracy ~0.2 in the posterior bulk (same trust region as Gaussian relative binning). The exact hyperbolic remains available in <code>GWLikelihoods</code> — use it for final checks.</p>
 <div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.likelihoods</span><span class="w"> </span><span class="kn">import</span> <span class="n">HeterodynedHyperbolicLikelihood</span>
 <span class="n">het_hyp</span> <span class="o">=</span> <span class="n">HeterodynedHyperbolicLikelihood</span><span class="o">.</span><span class="n">from_lvk_template</span><span class="p">(</span>
-    <span class="n">template</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">psd</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+    <span class="n">template</span><span class="p">,</span> <span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">psd</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span>
     <span class="n">theta_ref</span><span class="o">=</span><span class="n">theta_ref</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
 <span class="n">logl</span> <span class="o">=</span> <span class="n">het_hyp</span><span class="o">.</span><span class="n">logl</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>   <span class="c1"># theta = [waveform, alpha, delta_0..delta_n]</span>
 </code></pre></div>
@@ -862,7 +862,7 @@ check).</p>
       <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       

@@ -19,7 +19,7 @@
       
       
       <link rel="icon" href="assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.6">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
     
     
       
@@ -27,7 +27,7 @@
       
     
     
-      <link rel="stylesheet" href="assets/stylesheets/main.484c7ddc.min.css">
+      <link rel="stylesheet" href="assets/stylesheets/main.ec1eaa64.min.css">
       
         
         <link rel="stylesheet" href="assets/stylesheets/palette.ab4e12ef.min.css">
@@ -695,10 +695,10 @@ run with <code>vectorize=True</code> end to end.</p>
 </table>
 <h2 id="install">Install</h2>
 <div class="highlight"><pre><span></span><code>pip<span class="w"> </span>install<span class="w"> </span>hyperwave<span class="w">              </span><span class="c1"># core (CPU, LVK)</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hyperwave[plot,sampling]&quot;</span><span class="w">   </span><span class="c1"># + corner plots, pocoMC</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hyperwave[gpu]&quot;</span><span class="w">       </span><span class="c1"># + CuPy likelihoods</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hyperwave[ml4gw]&quot;</span><span class="w">     </span><span class="c1"># + Torch GPU waveforms (python &lt; 3.13)</span>
-pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot;hyperwave[flows]&quot;</span><span class="w">     </span><span class="c1"># + normalizing-flow proposals</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"hyperwave[plot,sampling]"</span><span class="w">   </span><span class="c1"># + corner plots, pocoMC</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"hyperwave[gpu]"</span><span class="w">       </span><span class="c1"># + CuPy likelihoods</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"hyperwave[ml4gw]"</span><span class="w">     </span><span class="c1"># + Torch GPU waveforms (python &lt; 3.13)</span>
+pip<span class="w"> </span>install<span class="w"> </span><span class="s2">"hyperwave[flows]"</span><span class="w">     </span><span class="c1"># + normalizing-flow proposals</span>
 </code></pre></div>
 <p>LISA waveforms (bbhx/GBGPU) require source builds at present — see
 <a href="lisa/">LISA</a> for the verified recipe.</p>
@@ -708,20 +708,20 @@ pip<span class="w"> </span>install<span class="w"> </span><span class="s2">&quot
 <span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.likelihoods</span><span class="w"> </span><span class="kn">import</span> <span class="n">GWLikelihoods</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.inference</span><span class="w"> </span><span class="kn">import</span> <span class="n">LVKinference</span>
 
-<span class="n">noise</span> <span class="o">=</span> <span class="n">DetectorNoise</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">2048.0</span><span class="p">,</span> <span class="n">trigger_time</span><span class="p">,</span> <span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span>
+<span class="n">noise</span> <span class="o">=</span> <span class="n">DetectorNoise</span><span class="p">(</span><span class="mf">4.0</span><span class="p">,</span> <span class="mf">2048.0</span><span class="p">,</span> <span class="n">trigger_time</span><span class="p">,</span> <span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span>
                       <span class="n">minimum_frequency</span><span class="o">=</span><span class="mf">20.0</span><span class="p">,</span> <span class="n">maximum_frequency</span><span class="o">=</span><span class="mf">512.0</span><span class="p">)</span>
 <span class="n">noise</span><span class="o">.</span><span class="n">generate_noise</span><span class="p">(</span><span class="n">real_noise</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="mi">42</span><span class="p">)</span>
-<span class="n">template</span> <span class="o">=</span> <span class="n">GW</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">approximant</span><span class="o">=</span><span class="s2">&quot;IMRPhenomPv2&quot;</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
-              <span class="n">static_parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;geocent_time&quot;</span><span class="p">:</span> <span class="n">trigger_time</span><span class="p">})</span>
+<span class="n">template</span> <span class="o">=</span> <span class="n">GW</span><span class="p">(</span><span class="n">noise</span><span class="p">,</span> <span class="n">approximant</span><span class="o">=</span><span class="s2">"IMRPhenomPv2"</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">names</span><span class="p">,</span>
+              <span class="n">static_parameters</span><span class="o">=</span><span class="p">{</span><span class="s2">"geocent_time"</span><span class="p">:</span> <span class="n">trigger_time</span><span class="p">})</span>
 <span class="n">template</span><span class="o">.</span><span class="n">make_injections_to_ifo</span><span class="p">(</span><span class="n">theta_true</span><span class="p">)</span>
 
 <span class="n">f</span><span class="p">,</span> <span class="n">asd</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">detector_asd_masked</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-<span class="n">likelihood</span> <span class="o">=</span> <span class="n">GWLikelihoods</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;H1&quot;</span><span class="p">,</span> <span class="s2">&quot;L1&quot;</span><span class="p">],</span> <span class="n">noise</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span>
+<span class="n">likelihood</span> <span class="o">=</span> <span class="n">GWLikelihoods</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">data</span><span class="p">,</span> <span class="n">f</span><span class="o">=</span><span class="n">f</span><span class="p">,</span> <span class="n">ifos_list</span><span class="o">=</span><span class="p">[</span><span class="s2">"H1"</span><span class="p">,</span> <span class="s2">"L1"</span><span class="p">],</span> <span class="n">noise</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span>
                            <span class="n">template</span><span class="o">=</span><span class="n">template</span><span class="p">,</span> <span class="n">ddims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">4</span><span class="p">)</span>
 
-<span class="n">inf</span> <span class="o">=</span> <span class="n">LVKinference</span><span class="p">(</span><span class="n">likelihood</span><span class="o">.</span><span class="n">hyperbolic_classic</span><span class="p">,</span> <span class="n">sampler_name</span><span class="o">=</span><span class="s2">&quot;eryn&quot;</span><span class="p">,</span>
+<span class="n">inf</span> <span class="o">=</span> <span class="n">LVKinference</span><span class="p">(</span><span class="n">likelihood</span><span class="o">.</span><span class="n">hyperbolic_classic</span><span class="p">,</span> <span class="n">sampler_name</span><span class="o">=</span><span class="s2">"eryn"</span><span class="p">,</span>
                    <span class="n">priors</span><span class="o">=</span><span class="n">priors</span><span class="p">,</span> <span class="n">noise_priors</span><span class="o">=</span><span class="n">noise_priors</span><span class="p">,</span>
-                   <span class="n">common_params</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;save_dir&quot;</span><span class="p">:</span> <span class="s2">&quot;out&quot;</span><span class="p">,</span> <span class="s2">&quot;TAG&quot;</span><span class="p">:</span> <span class="s2">&quot;bbh&quot;</span><span class="p">,</span> <span class="s2">&quot;like&quot;</span><span class="p">:</span> <span class="s2">&quot;hyperbolic&quot;</span><span class="p">},</span>
+                   <span class="n">common_params</span><span class="o">=</span><span class="p">{</span><span class="s2">"save_dir"</span><span class="p">:</span> <span class="s2">"out"</span><span class="p">,</span> <span class="s2">"TAG"</span><span class="p">:</span> <span class="s2">"bbh"</span><span class="p">,</span> <span class="s2">"like"</span><span class="p">:</span> <span class="s2">"hyperbolic"</span><span class="p">},</span>
                    <span class="n">sampler_kwargs</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">nwalkers</span><span class="o">=</span><span class="mi">50</span><span class="p">,</span> <span class="n">ntemps</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">burn</span><span class="o">=</span><span class="mi">5000</span><span class="p">,</span> <span class="n">nsteps</span><span class="o">=</span><span class="mi">20000</span><span class="p">))</span>
 <span class="n">inf</span><span class="o">.</span><span class="n">run</span><span class="p">()</span>
 <span class="n">result</span> <span class="o">=</span> <span class="n">inf</span><span class="o">.</span><span class="n">get_result</span><span class="p">(</span><span class="n">injection</span><span class="o">=</span><span class="n">theta_true</span><span class="p">)</span>
@@ -789,7 +789,7 @@ repository).</p>
       <script id="__config" type="application/json">{"annotate": null, "base": ".", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="assets/javascripts/bundle.79ae519e.min.js"></script>
+      <script src="assets/javascripts/bundle.d7400e89.min.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
