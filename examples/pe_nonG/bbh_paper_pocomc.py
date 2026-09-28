@@ -27,22 +27,25 @@ Notes
 from __future__ import annotations
 
 import argparse
+import io
+import logging
 import os
 import time
+import warnings
 
 import bilby
 import numpy as np
 
 from hyperwave.detectors.lvk import noise as noisemod
 from hyperwave.detectors.lvk import waveform as waveformmod
-from hyperwave.likelihoods import gwparallel
 from hyperwave.inference import sampling
+from hyperwave.likelihoods import gwparallel
 
 # silence bilby chatter
-import logging, io  # noqa: E402
-_bl = logging.getLogger("bilby"); _bl.propagate = False
-_bl.addHandler(logging.StreamHandler(stream=io.StringIO())); _bl.setLevel(logging.WARNING)
-import warnings  # noqa: E402
+_bl = logging.getLogger("bilby")
+_bl.propagate = False
+_bl.addHandler(logging.StreamHandler(stream=io.StringIO()))
+_bl.setLevel(logging.WARNING)
 warnings.filterwarnings("ignore")
 
 # geocent_time (t_c) is SAMPLED (last position) — not held static — so the

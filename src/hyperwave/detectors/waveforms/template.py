@@ -19,6 +19,7 @@ from __future__ import annotations
 
 import numpy as np
 
+from ..calibration import Recalibrate, _batch_calibration_factor, calibration_parameter_names
 from ..geometry import get_detector
 from .base import INTRINSIC_PARAMETERS
 from .lal_backend import LALWaveform
@@ -69,6 +70,7 @@ class Template:
         gpu=False,
         torch_device=None,
         sequence=False,
+        calibration_models=None,
     ):
         # sequence=True (lal backend only): evaluate exactly at frequency_array,
         # which may be sparse/non-uniform — used by the heterodyne likelihood.
@@ -89,6 +91,8 @@ class Template:
         self.static_parameters = dict(static_parameters or {})
         self.trigger_time = trigger_time if trigger_time is not None else self.start_time
         self.n_jobs = int(n_jobs)
+        self.calibration_models = self._normalize_calibration_models(calibration_models)
+        self.parameters = self._append_calibration_parameters(self.parameters)
 
         self.mask = (self.frequency_array >= self.minimum_frequency) & (
             self.frequency_array <= self.maximum_frequency
@@ -129,6 +133,38 @@ class Template:
                 torch_device=torch_device,
             )
         raise ValueError(f"Unknown waveform backend {backend!r}. Expected 'lal' or 'ml4gw'.")
+
+    def _normalize_calibration_models(self, calibration_models):
+        if calibration_models is None:
+            return [Recalibrate() for _ in self.detector_names]
+        if hasattr(calibration_models, "get_calibration_factor"):
+            if len(self.detector_names) != 1:
+                raise ValueError("A single calibration model can only be used with one detector.")
+            return [calibration_models]
+        if isinstance(calibration_models, dict):
+            models = []
+            for name in self.detector_names:
+                model = calibration_models.get(name)
+                models.append(model if model is not None else Recalibrate())
+            return models
+
+        models = list(calibration_models)
+        if len(models) != len(self.detector_names):
+            raise ValueError(
+                "calibration_models must have one entry per detector "
+                f"({len(self.detector_names)} expected, got {len(models)})."
+            )
+        return [model if model is not None else Recalibrate() for model in models]
+
+    def _append_calibration_parameters(self, parameters):
+        ordered = list(parameters)
+        known = set(ordered) | set(self.static_parameters)
+        for model in self.calibration_models:
+            for name in calibration_parameter_names(model):
+                if name not in known:
+                    ordered.append(name)
+                    known.add(name)
+        return ordered
 
     # -- parameter adapter ------------------------------------------------
     def _to_intrinsic(self, named):
@@ -220,6 +256,14 @@ class Template:
             dt = (gps - self.start_time) + det.time_delay_from_geocenter(ra, dec, gps)
             signal = fp[:, None] * hp_m + fc[:, None] * hc_m          # (N, n_freq)
             signal *= np.exp(-2j * np.pi * f[None, :] * dt[:, None])
+            cal_params = dict(named)
+            cal_params.setdefault("prefix", f"recalib_{self.detector_names[j]}_")
+            if masked:
+                signal *= _batch_calibration_factor(self.calibration_models[j], f, cal_params, n)
+            else:
+                signal[:, self.mask] *= _batch_calibration_factor(
+                    self.calibration_models[j], f[self.mask], cal_params, n
+                )
             out[:, j, :] = signal
         return out
 

@@ -52,7 +52,8 @@ def mc_q_to_m1_m2(Mc, q):
 
     Paper ``smbhb.get_m1_m2_from_chirp_and_eta``: eta = q/(1+q)^2.
     """
-    Mc = np.asarray(Mc, dtype=float); q = np.asarray(q, dtype=float)
+    Mc = np.asarray(Mc, dtype=float)
+    q = np.asarray(q, dtype=float)
     eta = q / (1.0 + q) ** 2
     Mtot = Mc * eta ** -0.6
     disc = np.sqrt(np.clip(1.0 - 4.0 * eta, 0.0, None))
@@ -124,7 +125,7 @@ class SMBHBbbhxTemplate:
 
     def __init__(self, freqs, f_ref=0.0, t_obs_years=1.0, modes=None, run_phenomd=True,
                  length=1024, force_backend=None):
-        from bbhx.waveformbuild import BBHWaveformFD   # lazy: keep import cheap
+        from bbhx.waveformbuild import BBHWaveformFD  # lazy: keep import cheap
         self.freqs = np.asarray(freqs, dtype=float)
         self.f_ref = float(f_ref)
         self.t_obs = float(t_obs_years) * YRSID_SI
