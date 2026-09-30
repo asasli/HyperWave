@@ -42,7 +42,7 @@ class DataInformedMarginal(_ErynDistribution):
         grid = np.asarray(grid, dtype=float)
         w = np.clip(np.asarray(weights, dtype=float), 0.0, None)
         w = w + floor_frac * (np.mean(w) if np.mean(w) > 0 else 1.0)
-        area = np.trapz(w, grid)
+        area = np.trapezoid(w, grid)
         self._grid = grid
         self._pdf = w / area
         self._logpdf = np.log(self._pdf)
