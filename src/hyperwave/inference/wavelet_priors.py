@@ -234,4 +234,116 @@ def build_wavelet_priors(
     }
 
 
-__all__ = ["SNRPrior", "CosinePrior", "LogUniformPrior", "build_wavelet_priors"]
+#: leaf index of the time / frequency / phase parameter of each packet family
+PACKET_TIME_INDEX = {"wavelet": 0, "chirplet": 0, "shapelet": 0}
+PACKET_FREQ_INDEX = {"wavelet": 1, "chirplet": 1}
+PACKET_PHASE_INDEX = {"wavelet": 4, "chirplet": 5, "shapelet": 4}
+
+
+def build_wavepacket_priors(
+    duration,
+    packets=("wavelet",),
+    *,
+    minimum_frequency=20.0,
+    maximum_frequency=512.0,
+    t0_bounds=None,
+    q_bounds=(0.1, 40.0),
+    fdot_bounds=(0.0, 1e-6),
+    log10_rate_bounds=None,
+    log10_beta_bounds=None,
+    order_max=5,
+    nleaves_max=10,
+    nleaves_min=0,
+    amplitude_param="snr",
+    rho_star=5.0,
+    snr_bounds=(0.0, 100.0),
+    amplitude_bounds=(0.0, 1e-20),
+):
+    """Eryn priors for a multi-family wave-packet model (one RJ branch per family).
+
+    Leaf layouts follow
+    :data:`~hyperwave.detectors.waveforms.wavepackets.WAVEPACKET_PARAMETERS`:
+
+    * ``wavelet``  ``[t0, f0, Q, amplitude, phi0]`` - as :func:`build_wavelet_priors`
+    * ``chirplet`` ``[tau, f0, fdot, log10_rate, amplitude, phi0]`` - ``tau`` uniform
+      over ``t0_bounds``, ``f0`` log-uniform over the band, ``fdot`` uniform over
+      ``fdot_bounds`` [Hz/s], ``log10_rate`` uniform (default: an e-folding time
+      between the segment and 1e-3 of it)
+    * ``shapelet`` ``[t0, log10_beta, order, amplitude, phi0]`` - ``log10_beta``
+      uniform (default: 1e-5 to 1e-2 of the segment), ``order`` uniform on
+      ``[0.5, order_max + 0.5]`` (rounded to ``1..order_max``)
+
+    ``amplitude`` uses the :class:`SNRPrior` (or uniform strain amplitude) and
+    ``phi0`` is uniform and periodic for every family. ``nleaves_max``,
+    ``nleaves_min`` and ``rho_star`` may be scalars or ``{packet: value}`` dicts.
+
+    Returns a dict shaped like :func:`build_wavelet_priors` (``priors``,
+    ``nleaves_max``, ``nleaves_min``, ``branch_names``, ``ndims``, ``periodic``,
+    plus ``extrinsic``) with one entry per packet, and also ``packets``,
+    ``parameters`` (names per packet) and ``prior_dists`` (the per-index
+    distributions, so proposals can swap individual marginals).
+    """
+    packets = tuple(packets)
+    if t0_bounds is None:
+        t0_bounds = (0.0, float(duration))
+    if log10_rate_bounds is None:
+        log10_rate_bounds = (np.log10(1.0 / duration), np.log10(1e3 / duration))
+    if log10_beta_bounds is None:
+        log10_beta_bounds = (np.log10(1e-5 * duration), np.log10(1e-2 * duration))
+
+    def per(val, packet):
+        return val[packet] if isinstance(val, dict) else val
+
+    def amp_prior(packet):
+        if amplitude_param == "snr":
+            return SNRPrior(rho_star=per(rho_star, packet),
+                            snr_min=snr_bounds[0], snr_max=snr_bounds[1])
+        if amplitude_param == "amplitude":
+            return uniform_dist(amplitude_bounds[0], amplitude_bounds[1])
+        raise ValueError("amplitude_param must be 'snr' or 'amplitude'.")
+
+    t_prior = lambda: uniform_dist(t0_bounds[0], t0_bounds[1])       # noqa: E731
+    f_prior = lambda: LogUniformPrior(minimum_frequency, maximum_frequency)  # noqa: E731
+    phi_prior = lambda: uniform_dist(0.0, 2.0 * np.pi)               # noqa: E731
+    dists = {
+        "wavelet": lambda: {0: t_prior(), 1: f_prior(),
+                            2: uniform_dist(q_bounds[0], q_bounds[1]),
+                            3: amp_prior("wavelet"), 4: phi_prior()},
+        "chirplet": lambda: {0: t_prior(), 1: f_prior(),
+                             2: uniform_dist(fdot_bounds[0], fdot_bounds[1]),
+                             3: uniform_dist(*log10_rate_bounds),
+                             4: amp_prior("chirplet"), 5: phi_prior()},
+        "shapelet": lambda: {0: t_prior(), 1: uniform_dist(*log10_beta_bounds),
+                             2: uniform_dist(0.5, order_max + 0.5),
+                             3: amp_prior("shapelet"), 4: phi_prior()},
+    }
+    names = {
+        "wavelet": ["t0", "f0", "Q", "amplitude", "phi0"],
+        "chirplet": ["tau", "f0", "fdot", "log10_rate", "amplitude", "phi0"],
+        "shapelet": ["t0", "log10_beta", "order", "amplitude", "phi0"],
+    }
+    unknown = set(packets) - set(dists)
+    if unknown or not packets:
+        raise ValueError(f"unknown packets {sorted(unknown)}; choose from {list(dists)}")
+
+    prior_dists = {p: dists[p]() for p in packets}
+    extrinsic = build_wavelet_priors(duration)["extrinsic"]
+    priors = {p: ProbDistContainer(prior_dists[p]) for p in packets}
+    return {
+        "packets": packets,
+        "prior_dists": prior_dists,
+        "extrinsic": extrinsic,
+        "priors": {**priors, "extrinsic": extrinsic},
+        "nleaves_max": {**{p: int(per(nleaves_max, p)) for p in packets}, "extrinsic": 1},
+        "nleaves_min": {**{p: int(per(nleaves_min, p)) for p in packets}, "extrinsic": 1},
+        "branch_names": [*packets, "extrinsic"],
+        "ndims": {**{p: len(names[p]) for p in packets}, "extrinsic": 4},
+        "parameters": {p: names[p] for p in packets},
+        "extrinsic_parameters": ["ra", "dec", "psi", "ellipticity"],
+        "periodic": {**{p: {PACKET_PHASE_INDEX[p]: 2.0 * np.pi} for p in packets},
+                     "extrinsic": {0: 2.0 * np.pi}},
+    }
+
+
+__all__ = ["SNRPrior", "CosinePrior", "LogUniformPrior", "build_wavelet_priors",
+           "build_wavepacket_priors"]

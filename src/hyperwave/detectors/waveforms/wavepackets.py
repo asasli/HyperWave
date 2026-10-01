@@ -1,5 +1,22 @@
-"""Morlet-Gabor wavelet waveforms for waveform-agnostic GW reconstruction.
+"""Wave-packet waveforms (wavelets, chirplets, shapelets) for waveform-agnostic
+GW reconstruction.
 
+Three packet families share one frequency-domain convention (continuous FT,
+time measured in seconds from the segment start) and one leaf layout ending in
+``(amplitude, phi0)``, so any combination of them can be summed into a single
+coherent signal (see :class:`WavePacketTemplate`):
+
+* ``wavelet``  - Morlet-Gabor (sine-Gaussian), analytic FD, described below;
+* ``chirplet`` - linear-frequency chirp with an exponential amplitude rise and a
+  smooth fade-out (inspiral-like), see :func:`chirplet_td`;
+* ``shapelet`` - one-sided exponential/Laguerre pulse (Baghi et al. 2022), see
+  :func:`shapelet_td`.
+
+Chirplets and shapelets have no closed-form FT, so they are evaluated on the
+segment's time grid and FFT'd onto the analysis band (batched, GPU-capable).
+
+Wavelets
+--------
 This implements the sine-Gaussian (Morlet-Gabor) wavelet frame (Cornish &
 Littenberg 2015) as a *GW waveform*: each wavelet is generated analytically in
 the frequency domain, a coherent signal is built from a (variable) sum of
@@ -430,7 +447,10 @@ class WaveletTemplate:
         idx = xp.asarray(np.asarray(groups, dtype=np.int64))
         hsum = xp.zeros((int(n_groups), self._f.size), dtype=hpsi.dtype)
         _scatter_add(xp, hsum, idx, hpsi)  # (G, n_freq)
+        return self._project_hsum(hsum, ra, dec, psi, ellipticity)
 
+    def _project_hsum(self, hsum, ra, dec, psi, ellipticity):
+        """Project per-walker ``h_plus`` sums ``(G, n_freq)`` with a fixed sky."""
         c, phase = self.projection_factors(ra, dec, psi, ellipticity)  # (nifo,), (nifo,nfreq)
         return c[None, :, None] * phase[None, :, :] * hsum[:, None, :]  # (G, nifo, nfreq)
 
@@ -450,13 +470,18 @@ class WaveletTemplate:
         idx = xp.asarray(np.asarray(wgroups, dtype=np.int64))
         hsum = xp.zeros((G, self._f.size), dtype=hpsi.dtype)
         _scatter_add(xp, hsum, idx, hpsi)  # (G, n_freq)
+        return self._project_hsum_sky(hsum, sky)
 
+    def _project_hsum_sky(self, hsum, sky):
+        """Project per-walker ``h_plus`` sums ``(G, n_freq)`` with a per-walker sky."""
+        xp = self.xp
+        G = hsum.shape[0]
         ra = np.asarray(sky[:, 0], dtype=float)
         dec = np.asarray(sky[:, 1], dtype=float)
         psi = np.asarray(sky[:, 2], dtype=float)
         ell = np.asarray(sky[:, 3], dtype=float)
 
-        out = xp.zeros((G, len(self.detectors), self._f.size), dtype=hpsi.dtype)
+        out = xp.zeros((G, len(self.detectors), self._f.size), dtype=hsum.dtype)
         for j, det in enumerate(self.detectors):
             # antenna pattern + geocentric delay are cheap on CPU (lal); the
             # large exp(-2j*pi*f*dt) over (G, n_freq) runs on the device.
@@ -492,8 +517,231 @@ class WaveletTemplate:
         return self._f
 
 
+# ---------------------------------------------------------------------------
+# Chirplets and shapelets
+# ---------------------------------------------------------------------------
+
+#: per-chirplet (leaf) parameter order
+CHIRPLET_PARAMETERS = ("tau", "f0", "fdot", "log10_rate", "amplitude", "phi0")
+#: per-shapelet (leaf) parameter order
+SHAPELET_PARAMETERS = ("t0", "log10_beta", "order", "amplitude", "phi0")
+#: leaf layout of every packet family (all end in ``amplitude, phi0``)
+WAVEPACKET_PARAMETERS = {
+    "wavelet": WAVELET_PARAMETERS,
+    "chirplet": CHIRPLET_PARAMETERS,
+    "shapelet": SHAPELET_PARAMETERS,
+}
+
+
+def chirplet_td(t, tau, f0, fdot, log10_rate, phi0, dt, fade_beta=12.0, xp=np):
+    """Unit-amplitude rising chirp with a smooth fade-out (time domain).
+
+    The ``chirp_rise_hphc`` packet of *chimera*: a linear-frequency (constant
+    ``fdot``) sinusoid whose amplitude rises exponentially up to ``tau`` and is
+    then switched off by a logistic fade, mimicking an inspiral-merger::
+
+        s(t)    = t - tau
+        Phi(t)  = 2 pi (f0 s + fdot s^2 / 2) + phi0
+        rise(t) = exp(rate * min(s, 0)),          rate = 10**log10_rate
+        fade(t) = (1 - tanh(s / (fade_beta dt))) / 2
+        h(t)    = rise * fade * cos(Phi)
+
+    The phase and frequency are anchored at ``tau`` (``f0`` is the frequency
+    reached at the fade-out, ``phi0`` the phase there) rather than at the segment
+    start as in chimera; the family of signals is identical, but this choice
+    decorrelates ``f0``/``phi0`` from ``fdot`` for packets far from ``t = 0``.
+
+    ``t`` is ``(1, n_t)``; the parameters are ``(M, 1)`` columns (or scalars).
+    Returns ``(M, n_t)``.
+    """
+    s = t - tau
+    phase = 2.0 * np.pi * (f0 * s + 0.5 * fdot * s * s) + phi0
+    rise = xp.exp((10.0 ** log10_rate) * xp.minimum(s, 0.0))
+    fade = 0.5 * (1.0 - xp.tanh(s / (fade_beta * dt)))
+    return rise * fade * xp.cos(phase)
+
+
+def shapelet_td(t, t0, log10_beta, order, xp=np):
+    """Unit-amplitude exponential (Laguerre) shapelet (time domain).
+
+    The one-sided shapelets of Baghi et al. 2022 (arXiv:2112.07490), as in
+    chimera's ``shapelet_hphc``::
+
+        x        = (t - t0) / beta,               beta = 10**log10_beta
+        psi_n(x) = c_n (2x/n) exp(-x/n) L^1_{n-1}(2x/n) H(x),  c_n = (-1)^(n-1) n^(-3/2)
+
+    with ``n = round(order) >= 1``. The associated Laguerre polynomial is built
+    by recurrence in ``xp`` (so it runs on the GPU too).
+
+    ``t`` is ``(1, n_t)``; the parameters are ``(M, 1)`` columns. Returns
+    ``(M, n_t)``.
+    """
+    n = xp.maximum(xp.rint(order), 1.0)                      # (M, 1) float
+    x = (t - t0) / (10.0 ** log10_beta)
+    x = xp.where(x >= 0.0, x, 0.0)                           # no overflow before onset
+    y = 2.0 * x / n
+    # L^1_k(y): L_0 = 1, L_1 = 2 - y, L_{k+1} = ((2k+2-y) L_k - (k+1) L_{k-1}) / (k+1)
+    lag = xp.ones_like(y)
+    l_prev, l_cur = xp.ones_like(y), 2.0 - y
+    for k in range(1, int(n.max())):
+        lag = xp.where(n - 1 == k, l_cur, lag)
+        l_prev, l_cur = l_cur, ((2 * k + 2 - y) * l_cur - (k + 1) * l_prev) / (k + 1)
+    c_n = xp.where(xp.fmod(n, 2.0) == 1.0, 1.0, -1.0) * n ** -1.5
+    psi = c_n * y * xp.exp(-x / n) * lag
+    return xp.where(t >= t0, psi, 0.0)
+
+
+class WavePacketTemplate(WaveletTemplate):
+    """Coherent template for any combination of wave-packet families.
+
+    Each family in ``packets`` (``"wavelet"``, ``"chirplet"``, ``"shapelet"``)
+    is one Eryn RJ branch; the plus polarisations of all active packets are
+    summed per walker and projected exactly as in :class:`WaveletTemplate`
+    (elliptical polarisation, same antenna/delay handling). With
+    ``packets=("wavelet",)`` this reproduces :class:`WaveletTemplate`.
+
+    Chirplets and shapelets are generated on the segment time grid
+    ``t_k = k dt`` (``dt = 1 / (N df)``, ``N = 2 f_max / df``) and mapped to the
+    band with ``dt * rfft`` (continuous-FT convention, matching
+    :func:`morlet_gabor_fd`). With ``amplitude_param="snr"`` their amplitude is
+    the exact per-packet optimal SNR against the reference (network) PSD.
+
+    Extra parameters (all others as for :class:`WaveletTemplate`)
+    ----------------------------------------------------------------
+    packets:
+        Iterable of packet-family names, in Eryn branch order.
+    fade_beta:
+        Chirplet fade-out width in samples (not sampled).
+    chunk:
+        Number of time-domain packets FFT'd per batch (bounds memory).
+    """
+
+    def __init__(self, detectors, frequency_array, duration, start_time,
+                 packets=("wavelet",), fade_beta=12.0, chunk=256, **kwargs):
+        super().__init__(detectors, frequency_array, duration, start_time, **kwargs)
+        self.packets = tuple(packets)
+        unknown = set(self.packets) - set(WAVEPACKET_PARAMETERS)
+        if unknown or not self.packets:
+            raise ValueError(f"unknown packets {sorted(unknown)}; choose from "
+                             f"{list(WAVEPACKET_PARAMETERS)}")
+        self.ndims = {p: len(WAVEPACKET_PARAMETERS[p]) for p in self.packets}
+        self.fade_beta = float(fade_beta)
+        self.chunk = int(chunk)
+
+        # time grid for the FFT'd packets: rfft bin k <-> f = k df
+        xp = self.xp
+        self._kband = np.rint(self._f / self.df).astype(np.int64)
+        self._nt = 2 * int(np.rint(self.frequency_array[-1] / self.df))
+        self._dt_grid = 1.0 / (self._nt * self.df)
+        self._t_xp = (xp.arange(self._nt, dtype=float) * self._dt_grid)[None, :]
+        self._kband_xp = xp.asarray(self._kband)
+
+    @property
+    def time_grid(self):
+        """``(t, dt)`` of the grid the time-domain packets are generated on."""
+        return self.to_numpy(self._t_xp[0]), self._dt_grid
+
+    def packet_td(self, packet, params_flat):
+        """Unit-amplitude time-domain packets ``(M, n_t)`` (chirplet/shapelet).
+
+        Columns as in :data:`WAVEPACKET_PARAMETERS`; the amplitude column is
+        ignored (and ``phi0`` too for shapelets, see :meth:`packet_hplus`).
+        """
+        xp = self.xp
+        p = xp.asarray(np.asarray(params_flat, dtype=float))
+        col = [p[:, i:i + 1] for i in range(p.shape[1])]
+        if packet == "chirplet":
+            return chirplet_td(self._t_xp, col[0], col[1], col[2], col[3], col[5],
+                               self._dt_grid, fade_beta=self.fade_beta, xp=xp)
+        if packet == "shapelet":
+            return shapelet_td(self._t_xp, col[0], col[1], col[2], xp=xp)
+        raise ValueError(f"{packet!r} is not a time-domain packet")
+
+    def packet_hplus(self, packet, params_flat):
+        """Per-packet plus polarisation on the band -> ``(M, n_freq)`` (xp).
+
+        Wavelets use the analytic :meth:`wavelet_hplus`. Chirplets and
+        shapelets are generated in the time domain and FFT'd in chunks; the
+        shapelet ``phi0`` rotates its positive-frequency content by
+        ``exp(i phi0)`` (``phi0 = 0, pi`` give the causal pulse with either
+        polarity), the same rotation that defines ``h_cross`` here.
+        """
+        if packet == "wavelet":
+            return self.wavelet_hplus(params_flat)
+        xp = self.xp
+        p = np.asarray(params_flat, dtype=float)
+        M = p.shape[0]
+        out = xp.zeros((M, self._f.size), dtype=complex)
+        for lo in range(0, M, self.chunk):
+            h = self.packet_td(packet, p[lo:lo + self.chunk])
+            H = xp.fft.rfft(h, n=self._nt, axis=-1)
+            out[lo:lo + self.chunk] = H[:, self._kband_xp] * self._dt_grid
+        cols = xp.asarray(p)                      # every layout ends in (amplitude, phi0)
+        if packet == "shapelet":
+            out *= xp.exp(1j * cols[:, -1])[:, None]
+        amp = cols[:, -2]
+        if self.amplitude_param == "snr":
+            if self._refpsd_xp is None:
+                raise ValueError("amplitude_param='snr' requires a PSD.")
+            norm2 = 4.0 * self.df * xp.sum(xp.abs(out) ** 2 / self._refpsd_xp[None, :], axis=1)
+            amp = xp.where(norm2 > 0, amp / xp.sqrt(xp.where(norm2 > 0, norm2, 1.0)), 0.0)
+        return out * amp[:, None]
+
+    # -- grouped projection over packet families ----------------------------
+    def as_packet_dict(self, x):
+        """Normalise Eryn's per-branch input to ``{packet: array}``.
+
+        Eryn passes a bare array for a single branch and a list (branch order)
+        for several; dicts are passed through.
+        """
+        if isinstance(x, dict):
+            return x
+        if isinstance(x, (list, tuple)):
+            return dict(zip(self.packets, x))
+        return {self.packets[0]: x}
+
+    def packet_hsum(self, params, groups, n_groups):
+        """Scatter-sum all active packets by walker -> ``(G, n_freq)`` (xp)."""
+        xp = self.xp
+        params, groups = self.as_packet_dict(params), self.as_packet_dict(groups)
+        hsum = xp.zeros((int(n_groups), self._f.size), dtype=complex)
+        for packet, p in params.items():
+            if p is None or len(p) == 0:
+                continue
+            idx = xp.asarray(np.asarray(groups[packet], dtype=np.int64))
+            _scatter_add(xp, hsum, idx, self.packet_hplus(packet, p))
+        return hsum
+
+    def project_grouped(self, params, groups, n_groups, ra, dec, psi, ellipticity):
+        """Fixed-sky grouped projection of all packets -> ``(G, n_ifo, n_freq)``.
+
+        ``params``/``groups`` are ``{packet: (M_p, ndim_p)}`` / ``{packet: (M_p,)}``
+        (or Eryn's list / bare-array form, see :meth:`as_packet_dict`).
+        """
+        hsum = self.packet_hsum(params, groups, n_groups)
+        return self._project_hsum(hsum, ra, dec, psi, ellipticity)
+
+    def project_grouped_sky(self, params, groups, sky, n_groups):
+        """Per-walker-sky grouped projection of all packets -> ``(G, n_ifo, n_freq)``."""
+        hsum = self.packet_hsum(params, groups, n_groups)
+        return self._project_hsum_sky(hsum, sky)
+
+    def make_injections_to_ifo_batch(self, thetas, masked=True):
+        if self.packets != ("wavelet",):
+            raise NotImplementedError(
+                "the fixed-dimension flat path supports wavelets only; use "
+                "project_grouped for chirplets/shapelets.")
+        return super().make_injections_to_ifo_batch(thetas, masked=masked)
+
+
 __all__ = [
     "WaveletTemplate",
+    "WavePacketTemplate",
+    "chirplet_td",
+    "shapelet_td",
+    "CHIRPLET_PARAMETERS",
+    "SHAPELET_PARAMETERS",
+    "WAVEPACKET_PARAMETERS",
     "morlet_gabor_fd",
     "amplitude_from_snr",
     "snr_from_amplitude",

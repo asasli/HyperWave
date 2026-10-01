@@ -27,7 +27,7 @@ from typing import Iterator, Optional
 import numpy as np
 
 from ..detectors.geometry import get_detector
-from ..detectors.waveforms.wavelets import (
+from ..detectors.waveforms.wavepackets import (
     amplitude_from_snr,
     morlet_gabor_fd,
 )

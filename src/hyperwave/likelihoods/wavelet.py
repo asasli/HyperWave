@@ -23,7 +23,7 @@ class WaveletLikelihood:
     psd:
         One-sided PSD ``(n_ifo, n_freq)`` on the same band.
     template:
-        A :class:`~hyperwave.detectors.waveforms.wavelets.WaveletTemplate` whose
+        A :class:`~hyperwave.detectors.waveforms.wavepackets.WaveletTemplate` whose
         analysis band matches ``data``/``psd``.
     """
 

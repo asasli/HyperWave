@@ -11,6 +11,7 @@ from .heterodyne import (
     heterodyne_bin_edges,
 )
 from .wavelet import WaveletLikelihood
+from .wavepacket import WavePacketLikelihood
 
 __all__ = [
     "BaseLikelihood",
@@ -23,4 +24,5 @@ __all__ = [
     "loglike",
     "gpu_backend_available",
     "WaveletLikelihood",
+    "WavePacketLikelihood",
 ]

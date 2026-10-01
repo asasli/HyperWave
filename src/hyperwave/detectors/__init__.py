@@ -22,7 +22,7 @@ from .data import Interferometer, InterferometerList
 from .geometry import Detector
 from .psd import PowerSpectralDensity
 from .strain import StrainData
-from .waveforms import Template, WaveletTemplate
+from .waveforms import Template, WavePacketTemplate, WaveletTemplate
 
 __all__ = [
     "Detector",
@@ -32,6 +32,7 @@ __all__ = [
     "InterferometerList",
     "Template",
     "WaveletTemplate",
+    "WavePacketTemplate",
     "SplineCalibration",
     "make_calibration_bank",
     "geometry",

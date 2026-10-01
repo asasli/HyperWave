@@ -104,6 +104,35 @@ def build_guided_birth(template, data, psd, spec, *, q_bounds=(0.1, 40.0),
     return {branch: birth, "extrinsic": spec["extrinsic"]}
 
 
+def build_wavepacket_birth(template, data, psd, spec, *, floor_frac=0.1, n=512):
+    """Data-informed birth ``generate_dist`` for every packet branch in ``spec``.
+
+    ``spec`` comes from
+    :func:`~hyperwave.inference.wavelet_priors.build_wavepacket_priors`. For each
+    family the time parameter (``t0``/``tau``) follows the whitened-data time
+    envelope and, where the family has one, the frequency parameter ``f0`` the
+    whitened-data power spectrum (as :func:`build_guided_birth`); every other
+    parameter keeps its prior. Returns ``{packet: ProbDistContainer}``.
+    """
+    from .wavelet_priors import PACKET_FREQ_INDEX, PACKET_TIME_INDEX
+
+    f = np.asarray(template.frequency_array_masked())
+    power_f = np.sum(np.abs(np.asarray(data)) ** 2 / np.asarray(psd), axis=0)
+    fgrid = np.linspace(f[0], f[-1], n)
+    f0_dist = DataInformedMarginal(fgrid, np.interp(fgrid, f, power_f), floor_frac)
+    tgrid, env = _whitened_time_envelope(template, data, psd, n=n)
+    t0_dist = DataInformedMarginal(tgrid, env, floor_frac)
+
+    out = {}
+    for packet in spec["packets"]:
+        dists = dict(spec["prior_dists"][packet])
+        dists[PACKET_TIME_INDEX[packet]] = t0_dist
+        if packet in PACKET_FREQ_INDEX:
+            dists[PACKET_FREQ_INDEX[packet]] = f0_dist
+        out[packet] = ProbDistContainer(dists)
+    return out
+
+
 class MatchedFilterBirth(_ErynDistribution):
     """Joint 5-parameter birth proposal with data-fitted SNR and phase.
 
@@ -151,7 +180,7 @@ class MatchedFilterBirth(_ErynDistribution):
     # -- the deterministic matched-filter fit ---------------------------------
     def _fit(self, t0, f0, Q):
         """(B,) params -> (mu_snr, phi_hat), chunked to bound memory."""
-        from ..detectors.waveforms.wavelets import morlet_gabor_fd, snr_from_amplitude
+        from ..detectors.waveforms.wavepackets import morlet_gabor_fd, snr_from_amplitude
 
         t0 = np.atleast_1d(np.asarray(t0, dtype=float))
         f0 = np.atleast_1d(np.asarray(f0, dtype=float))
@@ -548,7 +577,7 @@ class WaveletGroupStretchMove(GroupStretchMove):
         return c
 
 
-__all__ = ["DataInformedMarginal", "build_guided_birth", "build_flow_proposal",
+__all__ = ["DataInformedMarginal", "build_guided_birth", "build_wavepacket_birth", "build_flow_proposal",
            "guided_initial_wavelets", "WaveletFisherMove", "WaveletHalfCycleMove",
            "WaveletGroupStretchMove",
            "WaveletSkyRingMove"]

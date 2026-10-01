@@ -15,12 +15,14 @@ try:
         build_flow_proposal,
         build_guided_birth,
         build_mf_birth,
+        build_wavepacket_birth,
         guided_initial_wavelets,
     )
 except ImportError:
     DataInformedMarginal = MatchedFilterBirth = None
     WaveletFisherMove = WaveletHalfCycleMove = WaveletSkyRingMove = None
     build_flow_proposal = build_guided_birth = build_mf_birth = None
+    build_wavepacket_birth = None
     guided_initial_wavelets = None
 
 try:
@@ -47,9 +49,10 @@ except ImportError:
         return False
 
 try:
-    from .wavelet_priors import CosinePrior, SNRPrior, build_wavelet_priors
+    from .wavelet_priors import (CosinePrior, SNRPrior, build_wavelet_priors,
+                                 build_wavepacket_priors)
 except ImportError:
-    CosinePrior = SNRPrior = build_wavelet_priors = None
+    CosinePrior = SNRPrior = build_wavelet_priors = build_wavepacket_priors = None
 
 InferenceRunner = LVKinference
 
@@ -70,6 +73,8 @@ __all__ = [
     "make_flow_rj_move",
     # wavelet reconstruction
     "build_wavelet_priors",
+    "build_wavepacket_priors",
+    "build_wavepacket_birth",
     "SNRPrior",
     "CosinePrior",
     "WaveletConvergenceStopping",

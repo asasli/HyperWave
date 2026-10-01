@@ -18,6 +18,7 @@ from .detectors import (
     StrainData,
     Template,
     WaveletTemplate,
+    WavePacketTemplate,
 )
 from .detectors.lvk import GW, DetectorNoise
 from .inference import (
@@ -77,6 +78,7 @@ __all__ = [
     "InterferometerList",
     "Template",
     "WaveletTemplate",
+    "WavePacketTemplate",
     "DetectorNoise",
     "GW",
     # wavelet reconstruction

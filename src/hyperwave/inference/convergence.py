@@ -71,7 +71,8 @@ class WaveletConvergenceStopping(_ErynStopping):
     Parameters
     ----------
     nleaves_branch:
-        Branch whose leaf count is the model order (default ``"signal"``).
+        Branch whose leaf count is the model order (default ``"signal"``), or a
+        list of branches whose counts are summed (multi-family wave packets).
     nleaves_max:
         Upper bound on the leaf count (for the p(D) histogram).
     autocorr_mult:
@@ -117,7 +118,10 @@ class WaveletConvergenceStopping(_ErynStopping):
             return False
         discard = int(self.discard_frac * n)
         cold_logl = logl[discard:, 0, :]                     # (n', nwalkers)
-        nleaves = np.asarray(sampler.get_nleaves()[self.nleaves_branch])[discard:, 0, :]
+        branches = ([self.nleaves_branch] if isinstance(self.nleaves_branch, str)
+                    else list(self.nleaves_branch))
+        all_nleaves = sampler.get_nleaves()
+        nleaves = sum(np.asarray(all_nleaves[b]) for b in branches)[discard:, 0, :]
 
         tau_l = _integrated_act(cold_logl)
         tau_n = _integrated_act(nleaves.astype(float))

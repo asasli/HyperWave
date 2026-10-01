@@ -5,6 +5,7 @@
 * :class:`LALWaveform` - default, direct-lalsimulation, bit-exact vs bilby.
 * :class:`ML4GWWaveform` - optional Torch/ml4gw batched backend (experimental).
 * :class:`WaveletTemplate` - Morlet-Gabor wavelet signal model (waveform-agnostic).
+* :class:`WavePacketTemplate` - any combination of wavelets, chirplets, shapelets.
 """
 
 from __future__ import annotations
@@ -14,10 +15,16 @@ from .lal_backend import LALWaveform
 from .template import DEFAULT_BBH_PARAMETERS, Template, component_masses
 
 try:
-    from .wavelets import (
+    from .wavepackets import (
+        CHIRPLET_PARAMETERS,
         EXTRINSIC_PARAMETERS,
+        SHAPELET_PARAMETERS,
         WAVELET_PARAMETERS,
+        WAVEPACKET_PARAMETERS,
         WaveletTemplate,
+        WavePacketTemplate,
+        chirplet_td,
+        shapelet_td,
         amplitude_from_snr,
         ellipticity_from_ecc,
         morlet_gabor_fd,
@@ -26,7 +33,9 @@ try:
     )
 except ImportError:
     EXTRINSIC_PARAMETERS = WAVELET_PARAMETERS = None
-    WaveletTemplate = None
+    CHIRPLET_PARAMETERS = SHAPELET_PARAMETERS = WAVEPACKET_PARAMETERS = None
+    WaveletTemplate = WavePacketTemplate = None
+    chirplet_td = shapelet_td = None
     amplitude_from_snr = ellipticity_from_ecc = morlet_gabor_fd = None
     network_optimal_snr = snr_from_amplitude = None
 
@@ -38,8 +47,14 @@ __all__ = [
     "component_masses",
     "normalize_intrinsic_batch",
     "ML4GWWaveform",
-    # wavelets
+    # wave packets (wavelets, chirplets, shapelets)
     "WaveletTemplate",
+    "WavePacketTemplate",
+    "chirplet_td",
+    "shapelet_td",
+    "CHIRPLET_PARAMETERS",
+    "SHAPELET_PARAMETERS",
+    "WAVEPACKET_PARAMETERS",
     "morlet_gabor_fd",
     "amplitude_from_snr",
     "snr_from_amplitude",
