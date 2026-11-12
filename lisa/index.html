@@ -21,7 +21,7 @@
       
       
       <link rel="icon" href="../assets/logo.png">
-      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.7.7">
+      <meta name="generator" content="mkdocs-1.6.1, mkdocs-material-9.8.1">
     
     
       
@@ -29,10 +29,10 @@
       
     
     
-      <link rel="stylesheet" href="../assets/stylesheets/main.ec1eaa64.min.css">
+      <link rel="stylesheet" href="../assets/stylesheets/main.57a0d79d.min.css">
       
         
-        <link rel="stylesheet" href="../assets/stylesheets/palette.ab4e12ef.min.css">
+        <link rel="stylesheet" href="../assets/stylesheets/palette.fb2fffe2.min.css">
       
       
 
@@ -496,6 +496,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#sky-maps-and-credible-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sky maps and credible areas
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -628,6 +639,17 @@
   
 </li>
       
+        <li class="md-nav__item">
+  <a href="#sky-maps-and-credible-areas" class="md-nav__link">
+    <span class="md-ellipsis">
+      
+        Sky maps and credible areas
+      
+    </span>
+  </a>
+  
+</li>
+      
     </ul>
   
 </nav>
@@ -696,6 +718,56 @@ the batched path — plugs in directly:</p>
                                  <span class="n">sensitivity</span><span class="o">=</span><span class="n">psd</span><span class="p">,</span> <span class="n">freqs</span><span class="o">=</span><span class="n">freqs</span><span class="p">,</span>
                                  <span class="n">channels</span><span class="o">=</span><span class="p">(</span><span class="s2">"A"</span><span class="p">,</span> <span class="s2">"E"</span><span class="p">),</span> <span class="n">ddims</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">nsegs</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 </code></pre></div>
+<h2 id="sky-maps-and-credible-areas">Sky maps and credible areas</h2>
+<p><code>hyperwave.plots.SkyPosterior</code> turns the <code>(lam, sin_beta)</code> posterior columns into
+a gridded sky map using the canonical HyperWave estimator (equal-area
+<code>(lon, sin lat)</code> grid at 0.5 degree, one-cell Gaussian smoothing, greedy HPD),
+so the numbers it reports match <code>sky_credible_area</code>.</p>
+<div class="highlight"><pre><span></span><code><span class="kn">from</span><span class="w"> </span><span class="nn">hyperwave.plots</span><span class="w"> </span><span class="kn">import</span> <span class="n">SkyPosterior</span><span class="p">,</span> <span class="n">plot_skymap</span><span class="p">,</span> <span class="n">compare_skymaps</span>
+
+<span class="n">sky</span> <span class="o">=</span> <span class="n">result</span><span class="o">.</span><span class="n">skymap</span><span class="p">()</span>                       <span class="c1"># Result with lam / sin_beta columns</span>
+<span class="n">sky</span><span class="o">.</span><span class="n">credible_area</span><span class="p">(</span><span class="mf">0.9</span><span class="p">),</span> <span class="n">sky</span><span class="o">.</span><span class="n">credible_area</span><span class="p">(</span><span class="mf">0.5</span><span class="p">)</span>   <span class="c1"># deg^2</span>
+<span class="n">sky</span><span class="o">.</span><span class="n">modes</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>          <span class="c1"># distinct modes: mass, area, centre, peak, antipode_of</span>
+<span class="n">sky</span><span class="o">.</span><span class="n">dominant_mode_fraction</span><span class="p">(</span><span class="mf">0.9</span><span class="p">)</span>
+<span class="n">sky</span><span class="o">.</span><span class="n">truth_credible_level</span><span class="p">(</span><span class="n">lam0</span><span class="p">,</span> <span class="n">beta0</span><span class="p">)</span>       <span class="c1"># searched probability of the injection</span>
+<span class="n">sky</span><span class="o">.</span><span class="n">write_fits</span><span class="p">(</span><span class="s2">"alert.fits"</span><span class="p">,</span> <span class="n">nside</span><span class="o">=</span><span class="mi">64</span><span class="p">)</span>      <span class="c1"># HEALPix PROB map for telescope teams (healpy)</span>
+
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plot_skymap</span><span class="p">(</span><span class="n">sky</span><span class="p">,</span> <span class="n">truth</span><span class="o">=</span><span class="p">(</span><span class="n">lam0</span><span class="p">,</span> <span class="n">beta0</span><span class="p">),</span> <span class="n">fov</span><span class="o">=</span><span class="p">{</span><span class="s2">"Rubin"</span><span class="p">:</span> <span class="mf">9.6</span><span class="p">,</span> <span class="s2">"Athena"</span><span class="p">:</span> <span class="mf">0.4</span><span class="p">})</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">plot_skymap</span><span class="p">(</span><span class="n">sky</span><span class="p">,</span> <span class="n">dark</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>      <span class="c1"># talk version (dark page)</span>
+<span class="n">fig</span><span class="p">,</span> <span class="n">axes</span> <span class="o">=</span> <span class="n">compare_skymaps</span><span class="p">([</span><span class="n">sky_sub</span><span class="p">,</span> <span class="n">sky_fg</span><span class="p">,</span> <span class="n">sky_clean</span><span class="p">],</span>
+                            <span class="p">[</span><span class="s2">"HERON-subtracted"</span><span class="p">,</span> <span class="s2">"foreground"</span><span class="p">,</span> <span class="s2">"clean"</span><span class="p">],</span>
+                            <span class="n">truth</span><span class="o">=</span><span class="p">(</span><span class="n">lam0</span><span class="p">,</span> <span class="n">beta0</span><span class="p">),</span> <span class="n">reference</span><span class="o">=</span><span class="n">sky_unseeded</span><span class="p">)</span>
+</code></pre></div>
+<p>The figures follow the HERON pointing figure:</p>
+<ul>
+<li><code>plot_skymap</code> draws a Mollweide all-sky map (posterior density on a dark
+  sky, thin white 50%/90% contours, the strongest mode labelled "dominant" and
+  its antipodal image "antipodal") and a zoom on the dominant mode with filled
+  50%/90% regions, the injection star and equal-area circles for the requested
+  fields of view. <code>sky.plot()</code> and <code>sky.plot_zoom()</code> give the two panels
+  separately.</li>
+<li><code>compare_skymaps</code> overlays several runs: the first one filled, the others as
+  contour lines, an optional <code>reference</code> run (e.g. unseeded) as a dotted 90%
+  outline. The legend quotes <code>A90 / A50</code> and <code>f_dom</code> for every run.
+  <code>allsky=False</code> returns the zoom panel alone and
+  <code>window=(lon_min, lon_max, lat_min, lat_max)</code> fixes its limits in degrees.</li>
+</ul>
+<p>Conventions:</p>
+<ul>
+<li><strong>Areas</strong> always come from the canonical estimator. The drawn density and
+  contours use three cells of smoothing for display (<code>smooth=</code>), as stated in
+  the paper caption.</li>
+<li><strong>Modes</strong>: islands of the credible region closer than <code>merge_deg=45</code> degrees
+  form one mode, so a fragmented island is counted once. <code>f_dom</code> is the
+  probability of the part of the sky nearest to the dominant mode. In
+  <code>compare_skymaps</code> it is evaluated for every run on the sky region of the
+  first run's dominant mode.</li>
+<li><strong>Style</strong>: the functions apply their own matplotlib style (serif, inward
+  ticks) and leave the global <code>rcParams</code> unchanged; <code>usetex=True</code> renders the
+  text with LaTeX, and <code>sky_style()</code> is the same style as a context manager.</li>
+<li>Longitude increases to the right; <code>sky.plot(astro=True)</code> puts east on the
+  left.</li>
+</ul>
 
 
 
@@ -751,10 +823,10 @@ the batched path — plugs in directly:</p>
     
       
       
-      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.2c215733.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
+      <script id="__config" type="application/json">{"annotate": null, "base": "..", "features": ["navigation.sections", "navigation.top", "content.code.copy"], "search": "../assets/javascripts/workers/search.a7633da7.min.js", "tags": null, "translations": {"clipboard.copied": "Copied to clipboard", "clipboard.copy": "Copy to clipboard", "search.result.more.one": "1 more on this page", "search.result.more.other": "# more on this page", "search.result.none": "No matching documents", "search.result.one": "1 matching document", "search.result.other": "# matching documents", "search.result.placeholder": "Type to start searching", "search.result.term.missing": "Missing", "select.version": "Select version"}, "version": null}</script>
     
     
-      <script src="../assets/javascripts/bundle.d7400e89.min.js"></script>
+      <script src="../assets/javascripts/bundle.a5f9d56c.min.js"></script>
       
         <script src="https://unpkg.com/mathjax@3/es5/tex-mml-chtml.js"></script>
       
