@@ -26,6 +26,16 @@
 
 ::: hyperwave.validation.pp
 
+## Sky maps
+
+::: hyperwave.plots.skymap.SkyPosterior
+
+::: hyperwave.plots.skymap.plot_skymap
+
+::: hyperwave.plots.skymap.compare_skymaps
+
+::: hyperwave.plots.skymap.sky_style
+
 ## Detectors & templates
 
 ::: hyperwave.detectors.lvk.GW
