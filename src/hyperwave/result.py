@@ -145,6 +145,18 @@ class Result:
         k = len(self.parameter_names)
         return corner.corner(self.samples[:, :k], truths=t, **kwargs)
 
+    def skymap(self, lon: str = "lam", sinlat: Optional[str] = "sin_beta",
+               lat: Optional[str] = None, **kwargs):
+        """Sky posterior (:class:`hyperwave.plots.SkyPosterior`) from two columns.
+
+        Defaults to the LISA sampling names ``lam``/``sin_beta``; pass ``lat=``
+        instead of ``sinlat=`` for a latitude column (e.g. ``dec``).  Extra
+        keyword arguments go to :class:`SkyPosterior` (``nbins``, ``smooth``).
+        """
+        from .plots.skymap import SkyPosterior
+
+        return SkyPosterior.from_result(self, lon=lon, sinlat=sinlat, lat=lat, **kwargs)
+
     # -- I/O -------------------------------------------------------------------
     def save(self, path: str) -> str:
         """Persist to ``path``. ``.h5``/``.hdf5`` use h5py; otherwise ``.npz``."""
