@@ -34,6 +34,7 @@ class GW:
         gpu=False,
         torch_device=None,
         n_jobs=1,
+        calibration_models=None,
     ):
         self.noise = noise
         self.reference_frequency = reference_frequency
@@ -51,6 +52,13 @@ class GW:
         self.static_parameters = {} if static_parameters is None else dict(static_parameters)
         self.injection_parameters = self.parameters + list(self.static_parameters.keys())
         self.color_scheme = color
+        if calibration_models is None:
+            calibration_models = {
+                ifo.name: ifo.calibration_model
+                for ifo in self.ifos
+                if getattr(ifo, "calibration_model", None) is not None
+            }
+        self.calibration_models = calibration_models
 
         self._frequency_array = self.ifos.frequency_array
         self.df = self._frequency_array[1] - self._frequency_array[0]
@@ -77,8 +85,11 @@ class GW:
             n_jobs=n_jobs,
             gpu=gpu,
             torch_device=torch_device,
+            calibration_models=self.calibration_models,
         )
         self.waveform_backend = self.template.backend_name
+        self.parameters = list(self.template.parameters)
+        self.injection_parameters = self.parameters + list(self.static_parameters.keys())
 
         # Snapshot the noise-only spectrum so repeated injections don't accumulate.
         self._base_fd = [

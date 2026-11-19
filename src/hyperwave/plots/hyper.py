@@ -206,4 +206,3 @@ class Shape:
             plt.savefig(self.save_name + 'data_gaussianity.pdf', dpi=300, bbox_inches='tight', transparent=True)
 
         plt.show()
-

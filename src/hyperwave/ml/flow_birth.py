@@ -21,14 +21,14 @@ with no fixed training corpus required.
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Optional, Sequence
+from typing import Sequence
 
 import numpy as np
 
 try:
     import torch
-    from torch import nn
     import zuko
+    from torch import nn
 except ImportError as exc:  # pragma: no cover - optional dep
     raise ImportError(
         "hyperwave.ml.flow_birth needs torch + zuko. "

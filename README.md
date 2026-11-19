@@ -16,7 +16,7 @@ and runs on top of `lalsuite`, `gwpy`, `pocoMC` and `eryn`.
   non-Gaussian noise and glitches.
 - Batched waveform generation: a whole population of parameter sets is evaluated per call. The default backend calls `lalsimulation` directly and reproduces `bilby` waveforms to machine precision; an optional `ml4gw` backend generates batches with PyTorch.
 - GPU acceleration through CuPy for the likelihood algebra, with a NumPy fallback when no GPU is present.
-- Lean, `lal`-backed detector classes (geometry, antenna response, PSDs, strain FFTs); `bilby` is used only for its prior distributions.
+- Lean, `lal`-backed detector classes (geometry, antenna response, PSDs, strain FFTs); `bilby` is used for prior distributions and for reading LVK/bilby calibration response-curve files.
 
 ## Installation
 
@@ -106,7 +106,7 @@ print(gpu_backend_available(), torch_cuda_available())
 
 ```python
 from hyperwave import (
-    GWLikelihoods, loglike,                      # likelihoods
+    GWLikelihoods, TimeDomainGWLikelihoods, loglike,  # likelihoods
     DetectorNoise, GW,                           # LVK data and waveform template
     Detector, PowerSpectralDensity, StrainData,  # detector building blocks
     Interferometer, InterferometerList,
