@@ -34,7 +34,6 @@ from hyperwave.detectors.lvk import GW, DetectorNoise
 from hyperwave.inference import LVKinference, per_detector_noise_priors
 from hyperwave.likelihoods import GWLikelihoods
 
-
 BBH_PARAMETER_NAMES = [
     "chirp_mass", "mass_ratio", "luminosity_distance", "psi", "phase",
     "ra", "dec", "chi_1", "chi_2", "cos_theta_jn", "cos_tilt_1",
